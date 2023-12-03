@@ -1,7 +1,7 @@
 using LetsTalk;
 using LetsTalk.Services;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +22,8 @@ builder.Services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
@@ -36,44 +38,22 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
-app.MapGroup("/account").MapIdentityApi<User>();
+var account = app.MapGroup("/account");
+account.MapIdentityApi<User>();
+account.MapGet("/profile", async (UserManager<User> manager, ClaimsPrincipal principal) =>
+{
+    var user = await manager.FindByIdAsync(principal.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    return user is not null
+        ? Results.Ok(new UserProfile(user))
+        : Results.NotFound();
+}).RequireAuthorization();
 
 app.MapHub<AppHub>("/letstalk");
 
-var summaries = new[]
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", (IDistributedCache cache) =>
-{
-    var forecast = default(WeatherForecast[]);
-    var forecastJson = cache.GetString("weather_forecast");
-    if (forecastJson is not null)
-    {
-        forecast = JsonSerializer.Deserialize<WeatherForecast[]>(forecastJson);
-    }
-    else
-    {
-        forecast = Enumerable.Range(1, 5).Select(index =>
-            new WeatherForecast
-            (
-                DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                Random.Shared.Next(-20, 55),
-                summaries[Random.Shared.Next(summaries.Length)]
-            ))
-            .ToArray();
-
-        cache.SetString("weather_forecast", JsonSerializer.Serialize(forecast));
-    }
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.EnsureCreated();
+}
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

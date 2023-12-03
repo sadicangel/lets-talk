@@ -15,7 +15,7 @@ public sealed class User : IdentityUser
 
     public string? Avatar { get; set; }
 
-    public HashSet<string> Channels { get; init; } = [];
+    public List<string> Channels { get; init; } = [];
 }
 
 public sealed class UserClaim : IdentityUserClaim<string>;

@@ -1,6 +1,26 @@
 @WebApi_HostAddress = http://localhost:5292
 
-GET {{WebApi_HostAddress}}/weatherforecast/
+### @Register
+POST {{WebApi_HostAddress}}/account/register
 Accept: application/json
+Content-Type: application/json
 
-###
+{
+  "email": "super@lt.com",
+  "password": "Pass@123"
+}
+
+### @Login
+POST {{WebApi_HostAddress}}/account/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "super@lt.com",
+  "password": "Pass@123"
+}
+
+### @Profile
+GET {{WebApi_HostAddress}}/account/profile
+Accept: application/json
+Authorization: Bearer CfDJ8O5Jb2Gi9oZFvPZ92aw4RcvxJ9PF3W0h3EuR35lMGjP6qaDoLWubEzaFp9YCJwEz-i6zgVJ-FjB2IXI4_-cW2aFc-fbtWNrKpmW8NFNwOH8g2UMdxSJeU6cyddx5D39f5_jQcPcIiXim7OZNhpTqSIUkIGBkZk5cIbIDXOeUElpdDX-kM4nKg1DLcDd6KpfihMrihNUKhjvDjq9EjIbzHbMzSGykaDHvSxm_eldAz8zuDeKIyMZSenY5WfKRD26MidsZTqWiOkYxT0WTPxC_bA0gxE6eVwUGsPicDsb5pp9DcZGelmrsCBNRfFIPVf3m_MHbBoscpVPK7byE99jp5jkVDGMCouLjXJLHc1IUYP3LdATlYrr-Y9Cxc1oXRtj3a9JISc3RFp_4_Rao9BGr55WVcjvNXNgJ_E26zXyAf92EoVEvhY4CfMmqz_dAyycpKseOtMiJPKhWcxqB38v0pPfBGVUt9KWBF0SwYKJPKcBj2AaO2eskt0PPEwc3H98sGcOB-3oTeHKxYlN8Zt0Tzf4xqNOYRzgD8Q_N-68bkgCniy7azVhl4ujFhqG2HdwzfWQI_YjpEVcLKvpZVn7REBLnB6tbOiHL5tl9L0xO3C7mtUngsHWRJYXQvahiFrcmCNtDLNlQtWQGMuUXv5_dHqzb37_9TAmIhZchwG8oZ-z4r9goZUvIywIjMszFFyx1zQ
