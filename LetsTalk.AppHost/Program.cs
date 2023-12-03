@@ -9,7 +9,7 @@ var postgres = builder.AddPostgresContainer("postgres")
 
 var redis = builder.AddRedisContainer("redis");
 
-builder.AddProject<Projects.WebApi>("webapi")
+builder.AddProject<Projects.LetsTalk_WebApi>("webapi")
     .WithReference(postgres, "postgres")
     .WithReference(redis, "redis");
 
