@@ -1,3 +1,5 @@
+using Projects;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgres = builder.AddPostgresContainer("postgres")
@@ -9,9 +11,11 @@ var postgres = builder.AddPostgresContainer("postgres")
 
 var redis = builder.AddRedisContainer("redis");
 
-builder.AddProject<Projects.LetsTalk_WebApi>("webapi")
+var webapi = builder.AddProject<LetsTalk_WebApi>("webapi")
     .WithReference(postgres, "postgres")
     .WithReference(redis, "redis");
 
+builder.AddProject<LetsTalk_WebApp>("webapp")
+    .WithReference(webapi);
 
 builder.Build().Run();
