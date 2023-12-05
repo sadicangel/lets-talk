@@ -38,9 +38,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
-var account = app.MapGroup("/account");
-account.MapIdentityApi<User>();
-account.MapGet("/profile", async (UserManager<User> manager, ClaimsPrincipal principal) =>
+var account = app.MapGroup("/account").MapIdentityApi<User>();
+
+app.MapGet("/profile", async (UserManager<User> manager, ClaimsPrincipal principal) =>
 {
     var user = await manager.FindByIdAsync(principal.FindFirstValue(ClaimTypes.NameIdentifier)!);
     return user is not null
