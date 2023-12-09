@@ -12,6 +12,6 @@ public interface IAppHubClient
     Task OnUserJoined(UserJoined @event);
     Task OnUserLeft(UserLeft @event);
 
-    Task OnServerMessageBroadcast(ServerMessageBroadcast @event);
-    Task OnChannelMessageBroadcast(ChannelMessageBroadcast @event);
+    Task OnMessageBroadcast(MessageBroadcast @event);
+    Task OnNotificationBroadcast(NotificationBroadcast @event);
 }

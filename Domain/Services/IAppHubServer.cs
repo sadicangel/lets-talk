@@ -2,7 +2,7 @@
 
 public interface IAppHubServer
 {
-    Task CreateChannel(string channelName, string? channelIcon);
+    Task CreateChannel(string channelName, string channelIcon);
     Task DeleteChannel(string channelId);
 
     Task JoinChannel(string channelId);

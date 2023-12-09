@@ -13,9 +13,9 @@ public sealed class User : IdentityUser
     [ProtectedPersonalData]
     public override string? Email { get; set; } = null!;
 
-    public string? Avatar { get; set; }
+    public string Avatar { get; set; } = string.Empty;
 
-    public List<string> Channels { get; init; } = [];
+    public List<Channel> Channels { get; init; } = [];
 }
 
 public sealed class UserClaim : IdentityUserClaim<string>;
