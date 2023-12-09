@@ -1,6 +1,7 @@
 ﻿using LetsTalk.Events;
 using LetsTalk.Services;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace LetsTalk;
 
@@ -8,124 +9,149 @@ public sealed class AppHub(AppDbContext dbContext, HubConnectionManager connecti
 {
     public override async Task OnConnectedAsync()
     {
-        var user = await dbContext.Users.FindAsync(Context.UserIdentifier!) ?? throw new HubException("Not found");
+        var user = await dbContext.Users
+            .Include(x => x.Channels)
+            .AsNoTracking()
+            .SingleAsync(x => x.Id == Context.UserIdentifier!);
 
-        await Task.WhenAll(user.Channels.Select(channel => Groups.AddToGroupAsync(Context.ConnectionId, channel)));
+        await Task.WhenAll(user.Channels.Select(channel => Groups.AddToGroupAsync(Context.ConnectionId, channel.Id)));
 
-        var userProfile = new UserProfile(user);
-        connectionManager.Add(Context.ConnectionId, userProfile);
+        connectionManager.Add(Context.ConnectionId, user.Id);
 
-        await Clients.Others.OnUserConnected(new UserConnected(userProfile));
+        await Clients.Others.OnUserConnected(new UserConnected(user));
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var user = await dbContext.Users.FindAsync(Context.UserIdentifier!) ?? throw new HubException("Not found");
+        var user = await dbContext.Users
+            .Include(x => x.Channels)
+            .AsNoTracking()
+            .SingleAsync(x => x.Id == Context.UserIdentifier!);
 
-        await Task.WhenAll(user.Channels.Select(channel => Groups.RemoveFromGroupAsync(Context.ConnectionId, channel)));
+        await Task.WhenAll(user.Channels.Select(channel => Groups.RemoveFromGroupAsync(Context.ConnectionId, channel.Id)));
 
-        var userProfile = new UserProfile(user);
-        connectionManager.Add(Context.ConnectionId, userProfile);
+        connectionManager.Remove(Context.ConnectionId);
 
-        await Clients.Others.OnUserDisconnected(new UserDisconnected(userProfile));
+        await Clients.Others.OnUserDisconnected(new UserDisconnected(user));
     }
 
     public async Task CreateChannel(string channelName, string? channelIcon)
     {
-        var user = await dbContext.Users.FindAsync(Context.UserIdentifier!) ?? throw new HubException("Not found");
+        var user = await dbContext.Users
+            .Include(x => x.Channels)
+            .SingleAsync(x => x.Id == Context.UserIdentifier!);
 
+        var channelId = Guid.NewGuid().ToString();
         var channel = new Channel
         {
-            ChannelId = Guid.NewGuid().ToString(),
-            ChannelName = channelName,
-            ChannelIcon = channelIcon,
-            Owner = user.Id,
-            Users = { user.Id }
+            Id = channelId,
+            DisplayName = channelName,
+            Icon = channelIcon ?? $"https://api.dicebear.com/7.x/shapes/svg?seed={channelId}",
+            Admin = user,
+            Participants = [user]
         };
-        user.Channels.Add(channel.ChannelId);
+        user.Channels.Add(channel);
 
-        dbContext.Channels.Add(channel);
         await dbContext.SaveChangesAsync();
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, channel.ChannelId);
+        await Groups.AddToGroupAsync(Context.ConnectionId, channel.Id);
         await Clients.All.OnChannelCreated(new ChannelCreated(channel));
     }
 
     public async Task DeleteChannel(string channelId)
     {
-        var user = await dbContext.Users.FindAsync(Context.UserIdentifier!) ?? throw new HubException("Not found");
+        var channel = await dbContext.Channels
+            .Include(x => x.Admin)
+            .Include(x => x.Participants)
+            .SingleAsync(x => x.Id == channelId);
 
-        var channel = await dbContext.Channels.FindAsync(channelId) ?? throw new HubException("Not found");
-        if (channel.Owner != user.Id)
+        if (channel.Admin.Id != Context.UserIdentifier)
             throw new HubException("Unauthorized");
 
         dbContext.Channels.Remove(channel);
-        foreach (var channelUserId in channel.Users)
-        {
-            var channelUser = await dbContext.Users.FindAsync(channelUserId);
-            channelUser?.Channels.Remove(channel.ChannelId);
-        }
+
         await dbContext.SaveChangesAsync();
 
         await Clients.All.OnChannelDeleted(new ChannelDeleted(channel));
-        await Task.WhenAll(channel.Users
-            .SelectMany(connectionManager.GetConnectionsByUserId)
-            .Select(connection => Groups.RemoveFromGroupAsync(connection, channel.ChannelId)));
+        await Task.WhenAll(channel.Participants
+            .SelectMany(u => connectionManager.GetConnectionsByUserId(u.Id))
+            .Select(connection => Groups.RemoveFromGroupAsync(connection, channel.Id)));
     }
 
     public async Task JoinChannel(string channelId)
     {
-        var userProfile = connectionManager.GetUserByConnectionId(Context.ConnectionId);
-        var user = await dbContext.Users.FindAsync(Context.UserIdentifier!) ?? throw new HubException("Not found");
+        var user = await dbContext.Users
+            .Include(x => x.Channels)
+            .SingleAsync(x => x.Id == Context.UserIdentifier!);
 
-        if (!user.Channels.Contains(channelId))
+        if (!user.Channels.Exists(c => c.Id == channelId))
         {
-            var channel = await dbContext.Channels.FindAsync(channelId) ?? throw new HubException("Not found");
+            var channel = await dbContext.Channels
+                .Include(x => x.Participants)
+                .SingleAsync(x => x.Id == channelId);
 
-            user.Channels.Add(channelId);
-            channel.Users.Add(user.Id);
+            channel.Participants.Add(user);
 
             await dbContext.SaveChangesAsync();
 
             await Groups.AddToGroupAsync(Context.ConnectionId, channelId);
-            await Clients.OthersInGroup(channelId).OnUserJoined(new UserJoined(channel, userProfile));
+            await Clients.OthersInGroup(channelId).OnUserJoined(new UserJoined(user, channel));
         }
     }
 
     public async Task LeaveChannel(string channelId)
     {
-        var userProfile = connectionManager.GetUserByConnectionId(Context.ConnectionId);
-        var user = await dbContext.Users.FindAsync(Context.UserIdentifier!) ?? throw new HubException("Not found");
+        var user = await dbContext.Users
+            .Include(x => x.Channels)
+            .SingleAsync(x => x.Id == Context.UserIdentifier!);
 
-        if (user.Channels.Contains(channelId))
+        if (user.Channels.Exists(c => c.Id == channelId))
         {
-            var channel = await dbContext.Channels.FindAsync(channelId) ?? throw new HubException("Not found");
+            var channel = await dbContext.Channels
+                .Include(x => x.Admin)
+                .Include(x => x.Participants)
+                .SingleAsync(x => x.Id == channelId);
 
-            user.Channels.Remove(channelId);
-            channel.Users.Remove(user.Id);
+            channel.Participants.Remove(user);
 
-            if (channel.Users.Count == 0)
+            if (channel.Participants.Count == 0)
             {
                 dbContext.Channels.Remove(channel);
             }
-            else if (channel.Owner == user.Id)
+            else if (channel.Admin.Id == user.Id)
             {
-                channel.Owner = channel.Users.First();
+                // TODO: Pick oldest member instead or disallow while admin.
+                channel.Admin = channel.Participants[0];
             }
 
             await dbContext.SaveChangesAsync();
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, channelId);
-            await Clients.OthersInGroup(channelId).OnUserLeft(new UserLeft(channel, userProfile));
+            await Clients.OthersInGroup(channelId).OnUserLeft(new UserLeft(user, channel));
         }
     }
 
     public async Task SendMessage(string channelId, string contentType, byte[] content)
     {
-        var userProfile = connectionManager.GetUserByConnectionId(Context.ConnectionId);
-        var channel = await dbContext.Channels.FindAsync(channelId) ?? throw new HubException("Not found");
-        var message = new Message(contentType, content);
+        var user = await dbContext.Users
+            .SingleAsync(x => x.Id == Context.UserIdentifier!);
 
-        await Clients.Group(channel.ChannelId).OnChannelMessageBroadcast(new ChannelMessageBroadcast(channel, userProfile, message));
+        var channel = await dbContext.Channels
+                .SingleAsync(x => x.Id == channelId);
+
+        var message = new Message
+        {
+            Id = Guid.NewGuid().ToString(),
+            Channel = channel,
+            Sender = user,
+            ContentType = contentType,
+            Content = content,
+        };
+
+        channel.Messages.Add(message);
+
+        await dbContext.SaveChangesAsync();
+
+        await Clients.Group(channel.Id).OnMessageBroadcast(new MessageBroadcast(message));
     }
 }
