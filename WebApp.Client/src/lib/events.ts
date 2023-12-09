@@ -1,7 +1,7 @@
 export interface EventBase {
-  id: string;
-  type: string;
-  time: string;
+  eventId: string;
+  eventType: string;
+  eventTimestamp: string;
 }
 
 export interface UserConnected extends EventBase {

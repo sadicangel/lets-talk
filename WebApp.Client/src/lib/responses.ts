@@ -2,7 +2,7 @@ export interface UserProfile {
     userId: string;
     userName: string;
     userAvatar: string;
-    channels: ChannelProfile[]
+    channels: ChannelProfile[];
 }
 
 export interface ChannelProfile {

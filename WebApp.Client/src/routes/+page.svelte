@@ -17,6 +17,8 @@
         UserLeft
     } from '$lib/events';
     import type { UserProfile } from '$lib/responses';
+    import { encodeText } from '$lib/utf8';
+    import Message from '$lib/components/Message.svelte';
 
     let profile: UserProfile = {
         userId: '',
@@ -86,6 +88,33 @@
             });
 
             await connectToHub();
+
+            const list = (messages[profile.channels[0].channelId] =
+                messages[profile.channels[0].channelId] || []);
+            list.push({
+                senderId: 'cb33be51-2342-488d-8882-54028d40d91c',
+                senderAvatar:
+                    'https://api.dicebear.com/7.x/fun-emoji/svg?seed=cb33be51-2342-488d-8882-54028d40d91c',
+                senderName: 'other@lt.com',
+                channelId: '6e5312d6-57e0-4362-925d-a3881c1e5df7',
+                channelName: 'admins',
+                channelIcon:
+                    'https://api.dicebear.com/7.x/shapes/svg?seed=6e5312d6-57e0-4362-925d-a3881c1e5df7',
+                content: encodeText('Odio harum omnis quo labore laborum. Sequi?'),
+                contentType: 'text/plain',
+                eventId: '',
+                eventTimestamp: '',
+                eventType: '',
+                timestamp: new Date().toISOString()
+            });
+            messages = messages;
+
+            await connection.send(
+                'SendMessage',
+                profile.channels[0].channelId,
+                'text/plain',
+                encodeText('Lorem ipsum dolor sit amet consectetur adipisicing elit.')
+            );
         } else {
             console.error(await response.text());
         }
@@ -132,15 +161,6 @@
     let sendChannelId = undefined as unknown as string;
     let sendContentType = 'text/plain';
     let sendContent = undefined as unknown as string;
-
-    const { encodeText, decodeText } = (function () {
-        const encoder = new TextEncoder();
-        return {
-            encodeText: (content: string) =>
-                Buffer.from(encoder.encode(content)).toString('base64'),
-            decodeText: (content: string) => Buffer.from(content, 'base64').toString()
-        };
-    })();
 
     async function sendMessage() {
         await connection.send(
@@ -199,8 +219,10 @@
             <div class="text-xl">{channel.channelName}</div>
             {#if Array.isArray(messages[channel.channelId])}
                 <ul>
-                    {#each messages[channel.channelId] as m}
-                        <li>({m.channelName}) {m.senderName}: {decodeText(m.content)}</li>
+                    {#each messages[channel.channelId] as message}
+                        <li>
+                            <Message {message} justifyStart={message.senderId !== profile.userId} />
+                        </li>
                     {/each}
                 </ul>
             {/if}
