@@ -30,7 +30,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityUser
         {
             b.HasOne(x => x.Admin)
                 .WithMany()
-                .HasForeignKey("OwnerId");
+                .HasForeignKey(x => x.AdminId);
         });
 
         builder.Entity<UserChannel>(b =>
@@ -58,16 +58,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityUser
             b.Property(x => x.Timestamp)
             .HasDefaultValueSql("now()");
         });
-    }
-
-    public class UserChannel
-    {
-        public required string UserId { get; init; }
-        public required User User { get; init; }
-
-        public required string ChannelId { get; init; }
-        public required Channel Channel { get; init; }
-
-        public DateTimeOffset MemberSince { get; init; }
     }
 }

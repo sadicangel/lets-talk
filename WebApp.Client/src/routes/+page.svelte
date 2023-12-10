@@ -9,6 +9,7 @@
     import type {
         ChannelCreated,
         ChannelDeleted,
+        ChannelUpdated,
         MessageBroadcast,
         NotificationBroadcast,
         UserConnected,
@@ -62,6 +63,10 @@
 
             connection.on('OnChannelCreated', (event: ChannelCreated) => {
                 console.log('ChannelCreated', event);
+            });
+
+            connection.on('OnChannelUpdated', (event: ChannelUpdated) => {
+                console.log('ChannelUpdated', event);
             });
 
             connection.on('OnChannelDeleted', (event: ChannelDeleted) => {
@@ -136,13 +141,38 @@
     let createChannelName = undefined as unknown as string;
 
     async function createChannel() {
-        await connection.send('CreateChannel', createChannelName, null);
+        const response = await fetch('/api/channels', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ channelName: createChannelName })
+        });
+        console.log(await response.json());
+    }
+
+    let updateChannelId = undefined as unknown as string;
+    let updateChannelName = undefined as unknown as string;
+    let updateChannelIcon = undefined as unknown as string;
+
+    async function updateChannel() {
+        const response = await fetch(`/api/channels/${updateChannelId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ channelName: updateChannelName, channelIcon: updateChannelIcon })
+        });
+        console.log(await response.json());
     }
 
     let deleteChannelId = undefined as unknown as string;
 
     async function deleteChannel() {
-        await connection.send('DeleteChannel', deleteChannelId);
+        const response = await fetch(`/api/channels/${deleteChannelId}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) console.error(await response.text());
     }
 
     let joinChannelId = undefined as unknown as string;
@@ -187,6 +217,12 @@
     <div>
         <input type="text" placeholder="channel name" bind:value={createChannelName} />
         <button disabled={!createChannelName} on:click={createChannel}>Create Channel</button>
+    </div>
+    <div>
+        <input type="text" placeholder="channel id" bind:value={updateChannelId} />
+        <input type="text" placeholder="channel name" bind:value={updateChannelName} />
+        <input type="text" placeholder="channel icon" bind:value={updateChannelIcon} />
+        <button disabled={!updateChannelName} on:click={updateChannel}>Update Channel</button>
     </div>
     <div>
         <input type="text" placeholder="channel id" bind:value={deleteChannelId} />

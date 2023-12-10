@@ -23,5 +23,3 @@ public sealed class UserClaim : IdentityUserClaim<string>;
 public sealed class UserLogin : IdentityUserLogin<string>;
 
 public sealed class UserToken : IdentityUserToken<string>;
-
-#pragma warning restore CS8765
