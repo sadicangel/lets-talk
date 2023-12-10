@@ -16,7 +16,7 @@ public sealed class AppHub(AppDbContext dbContext, HubConnectionManager connecti
 
         await Task.WhenAll(user.Channels.Select(channel => Groups.AddToGroupAsync(Context.ConnectionId, channel.Id)));
 
-        connectionManager.Add(Context.ConnectionId, user.Id);
+        connectionManager.Add(user.Id, Context.ConnectionId);
 
         await Clients.Others.OnUserConnected(new UserConnected(user));
     }
@@ -30,52 +30,9 @@ public sealed class AppHub(AppDbContext dbContext, HubConnectionManager connecti
 
         await Task.WhenAll(user.Channels.Select(channel => Groups.RemoveFromGroupAsync(Context.ConnectionId, channel.Id)));
 
-        connectionManager.Remove(Context.ConnectionId);
+        connectionManager.Remove(user.Id);
 
         await Clients.Others.OnUserDisconnected(new UserDisconnected(user));
-    }
-
-    public async Task CreateChannel(string channelName, string? channelIcon)
-    {
-        var user = await dbContext.Users
-            .Include(x => x.Channels)
-            .SingleAsync(x => x.Id == Context.UserIdentifier!);
-
-        var channelId = Guid.NewGuid().ToString();
-        var channel = new Channel
-        {
-            Id = channelId,
-            DisplayName = channelName,
-            Icon = channelIcon ?? $"https://api.dicebear.com/7.x/shapes/svg?seed={channelId}",
-            Admin = user,
-            Participants = [user]
-        };
-        user.Channels.Add(channel);
-
-        await dbContext.SaveChangesAsync();
-
-        await Groups.AddToGroupAsync(Context.ConnectionId, channel.Id);
-        await Clients.All.OnChannelCreated(new ChannelCreated(channel));
-    }
-
-    public async Task DeleteChannel(string channelId)
-    {
-        var channel = await dbContext.Channels
-            .Include(x => x.Admin)
-            .Include(x => x.Participants)
-            .SingleAsync(x => x.Id == channelId);
-
-        if (channel.Admin.Id != Context.UserIdentifier)
-            throw new HubException("Unauthorized");
-
-        dbContext.Channels.Remove(channel);
-
-        await dbContext.SaveChangesAsync();
-
-        await Clients.All.OnChannelDeleted(new ChannelDeleted(channel));
-        await Task.WhenAll(channel.Participants
-            .SelectMany(u => connectionManager.GetConnectionsByUserId(u.Id))
-            .Select(connection => Groups.RemoveFromGroupAsync(connection, channel.Id)));
     }
 
     public async Task JoinChannel(string channelId)
@@ -141,9 +98,11 @@ public sealed class AppHub(AppDbContext dbContext, HubConnectionManager connecti
 
         var message = new Message
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Uuid7.Create(),
             Channel = channel,
+            ChannelId = channel.Id,
             Sender = user,
+            SenderId = user.Id,
             ContentType = contentType,
             Content = content,
         };

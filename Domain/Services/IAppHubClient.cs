@@ -7,6 +7,7 @@ public interface IAppHubClient
     Task OnUserDisconnected(UserDisconnected @event);
 
     Task OnChannelCreated(ChannelCreated @event);
+    Task OnChannelUpdated(ChannelUpdated @event);
     Task OnChannelDeleted(ChannelDeleted @event);
 
     Task OnUserJoined(UserJoined @event);

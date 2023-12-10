@@ -22,6 +22,12 @@ export interface ChannelCreated extends EventBase {
   channelIcon: string;
 }
 
+export interface ChannelUpdated extends EventBase {
+  channelId: string;
+  channelName: string;
+  channelIcon: string;
+}
+
 export interface ChannelDeleted extends EventBase {
   channelId: string;
   channelName: string;

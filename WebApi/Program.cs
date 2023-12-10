@@ -1,4 +1,6 @@
 using LetsTalk;
+using LetsTalk.Channels;
+using LetsTalk.Responses;
 using LetsTalk.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +55,8 @@ app.MapGet("/account/profile", async (UserManager<User> manager, AppDbContext db
     return Results.Ok(new UserProfile(user));
 }).RequireAuthorization();
 
+app.MapChannelEndpoints();
+
 app.MapHub<AppHub>("/letstalk");
 
 {
@@ -67,15 +71,16 @@ app.MapHub<AppHub>("/letstalk");
             dbContext.Database.EnsureCreated();
         });
 
+    var userId = Uuid7.Create();
     var user = new User
     {
-        Id = "e4e370a1-8a46-4323-80f5-a5e6b1e91d5e",
+        Id = userId,
         UserName = "user@lt.com",
         NormalizedUserName = "USER@LT.COM",
         Email = "user@lt.com",
         NormalizedEmail = "USER@LT.COM",
         EmailConfirmed = false,
-        Avatar = "https://api.dicebear.com/7.x/fun-emoji/svg?seed=e4e370a1-8a46-4323-80f5-a5e6b1e91d5e",
+        Avatar = $"https://api.dicebear.com/7.x/fun-emoji/svg?seed={userId}",
         PasswordHash = "AQAAAAIAAYagAAAAENlO6EaetzL0KAJCSHYObRTLwxD/XFsstNC1JGBtdV4TMpghkn7dEscPdoRR83bO/g==",
         SecurityStamp = "BVZ3RAYR2STMNMXPUOT5KPA5OAH27OYW",
         ConcurrencyStamp = "b610bb71-712e-4c8d-b0d7-cb4dddee1e97",
@@ -88,13 +93,14 @@ app.MapHub<AppHub>("/letstalk");
     };
 
     dbContext.Users.Add(user);
-    var channelId = Guid.NewGuid().ToString();
+    var channelId = Uuid7.Create();
     dbContext.Channels.Add(new Channel
     {
-        Id = "6e5312d6-57e0-4362-925d-a3881c1e5df7",
+        Id = channelId,
         DisplayName = "admins",
-        Icon = "https://api.dicebear.com/7.x/shapes/svg?seed=6e5312d6-57e0-4362-925d-a3881c1e5df7",
+        Icon = $"https://api.dicebear.com/7.x/shapes/svg?seed={channelId}",
         Admin = user,
+        AdminId = user.Id,
         Participants = [user]
     });
     dbContext.SaveChanges();
