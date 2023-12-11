@@ -1,12 +1,16 @@
-export interface UserProfile {
+export interface UserProfileResponse {
     userId: string;
     userName: string;
     userAvatar: string;
-    channels: ChannelProfile[];
 }
 
-export interface ChannelProfile {
+export interface UserChannelListChannel {
     channelId: string;
     channelName: string;
     channelIcon: string;
+};
+
+export interface UserChannelListResponse {
+
+    channels: UserChannelListChannel[]
 }

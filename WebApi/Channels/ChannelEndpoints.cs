@@ -1,5 +1,5 @@
-﻿using LetsTalk.Events;
-using LetsTalk.Responses;
+﻿using LetsTalk.Channels.Dtos;
+using LetsTalk.Events;
 using LetsTalk.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
@@ -12,7 +12,7 @@ public static class ChannelEndpoints
 {
     public static IEndpointRouteBuilder MapChannelEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var channels = endpoints.MapGroup("channels");
+        var channels = endpoints.MapGroup("channels").RequireAuthorization();
         channels.MapGet("", GetChannelList).WithName(nameof(GetChannelList));
         channels.MapGet("{channelId}", GetChannelById).WithName(nameof(GetChannelById));
         channels.MapPost("", CreateChannel).WithName(nameof(CreateChannel));
@@ -23,30 +23,38 @@ public static class ChannelEndpoints
 
     private static async Task<Results<UnauthorizedHttpResult, Ok<ChannelListResponse>>> GetChannelList(
         string? after,
+        uint? pageSize,
         AppDbContext dbContext)
     {
         var channelsQuery = dbContext.Channels.AsQueryable();
         if (after is not null)
             channelsQuery = channelsQuery.Where(x => after.CompareTo(x.Id) > 0);
 
+        var pageSizeValue = 50;
+        if (pageSize is not null)
+            pageSizeValue = Math.Min((int)pageSize.Value, pageSizeValue);
+
         var channels = await channelsQuery
-            .Take(50)
-            .Select(x => new ChannelProfile(x))
+            .Take(pageSizeValue + 1)
+            .Select(x => new ChannelListChannel(x))
             .ToListAsync();
-        return TypedResults.Ok(new ChannelListResponse(channels));
+
+        return TypedResults.Ok(channels.Count > pageSizeValue
+            ? new ChannelListResponse(channels.GetRange(0, pageSizeValue), channels[^1].ChannelId)
+            : new ChannelListResponse(channels, After: null));
     }
 
-    private static async Task<Results<UnauthorizedHttpResult, NotFound, Ok<ChannelProfile>>> GetChannelById(
+    private static async Task<Results<UnauthorizedHttpResult, NotFound, Ok<ChannelListChannel>>> GetChannelById(
         string channelId,
         AppDbContext dbContext)
     {
         var channel = await dbContext.Channels.SingleOrDefaultAsync(x => x.Id == channelId);
         return channel is null
         ? TypedResults.NotFound()
-        : TypedResults.Ok(new ChannelProfile(channel));
+        : TypedResults.Ok(new ChannelListChannel(channel));
     }
 
-    private static async Task<Results<UnauthorizedHttpResult, ValidationProblem, CreatedAtRoute<ChannelProfile>>> CreateChannel(
+    private static async Task<Results<UnauthorizedHttpResult, ValidationProblem, CreatedAtRoute<ChannelListChannel>>> CreateChannel(
         CreateChannelRequest request,
         ClaimsPrincipal principal,
         AppDbContext dbContext,
@@ -78,7 +86,7 @@ public static class ChannelEndpoints
             await hubContext.Groups.AddToGroupAsync(connectionId, channel.Id);
         await hubContext.Clients.All.OnChannelCreated(new ChannelCreated(channel));
 
-        return TypedResults.CreatedAtRoute(new ChannelProfile(channel), nameof(GetChannelById), new { channelId });
+        return TypedResults.CreatedAtRoute(new ChannelListChannel(channel), nameof(GetChannelById), new { channelId });
     }
 
     private static async Task<Results<UnauthorizedHttpResult, NotFound, ValidationProblem, Ok>> UpdateChannel(

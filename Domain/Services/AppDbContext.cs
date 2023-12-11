@@ -7,6 +7,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityUser
 {
     public virtual DbSet<Channel> Channels { get; set; }
 
+    public virtual DbSet<UserChannel> UserChannels { get; set; }
+
     public virtual DbSet<Message> Messages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)

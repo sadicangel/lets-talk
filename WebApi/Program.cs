@@ -1,11 +1,9 @@
 using LetsTalk;
+using LetsTalk.Account;
 using LetsTalk.Channels;
-using LetsTalk.Responses;
 using LetsTalk.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Polly;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,19 +40,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
-var account = app.MapGroup("/account").MapIdentityApi<User>();
-
-app.MapGet("/account/profile", async (UserManager<User> manager, AppDbContext dbContext, ClaimsPrincipal principal) =>
-{
-    var user = await manager.FindByIdAsync(principal.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    if (user is null)
-        return Results.NotFound();
-
-    await dbContext.Entry(user).Collection(x => x.Channels).LoadAsync();
-
-    return Results.Ok(new UserProfile(user));
-}).RequireAuthorization();
-
+app.MapAccountEndpoints();
 app.MapChannelEndpoints();
 
 app.MapHub<AppHub>("/letstalk");
