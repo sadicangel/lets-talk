@@ -7,6 +7,7 @@
     import { messageList$ } from '$lib/stores/messageList';
     import { hubConnection$ } from '$lib/stores/hubConnection';
     import { hubConnectionStatus$ } from '$lib/stores/hubConnectionStatus';
+    import api from '$lib/api';
 
     onMount(async () => {
         await userProfile$.fetch();
@@ -46,14 +47,7 @@
     let createChannelName = undefined as unknown as string;
 
     async function createChannel() {
-        const response = await fetch('/api/channels', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ channelName: createChannelName })
-        });
-        console.log(await response.json());
+        console.log(await api.channel.create(createChannelName));
     }
 
     let updateChannelId = undefined as unknown as string;
@@ -61,23 +55,15 @@
     let updateChannelIcon = undefined as unknown as string;
 
     async function updateChannel() {
-        const response = await fetch(`/api/channels/${updateChannelId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ channelName: updateChannelName, channelIcon: updateChannelIcon })
-        });
-        console.log(await response.json());
+        console.log(
+            await api.channel.update(updateChannelId, updateChannelName, updateChannelIcon)
+        );
     }
 
     let deleteChannelId = undefined as unknown as string;
 
     async function deleteChannel() {
-        const response = await fetch(`/api/channels/${deleteChannelId}`, {
-            method: 'DELETE'
-        });
-        if (!response.ok) console.error(await response.text());
+        console.log(await api.channel.delete(deleteChannelId));
     }
 
     let joinChannelId = undefined as unknown as string;

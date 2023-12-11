@@ -23,24 +23,24 @@ public static class ChannelEndpoints
 
     private static async Task<Results<UnauthorizedHttpResult, Ok<ChannelListResponse>>> GetChannelList(
         string? after,
-        uint? pageSize,
+        uint? count,
         AppDbContext dbContext)
     {
         var channelsQuery = dbContext.Channels.AsQueryable();
         if (after is not null)
             channelsQuery = channelsQuery.Where(x => after.CompareTo(x.Id) > 0);
 
-        var pageSizeValue = 50;
-        if (pageSize is not null)
-            pageSizeValue = Math.Min((int)pageSize.Value, pageSizeValue);
+        var pageSize = 50;
+        if (count is not null)
+            pageSize = Math.Min((int)count.Value, pageSize);
 
         var channels = await channelsQuery
-            .Take(pageSizeValue + 1)
+            .Take(pageSize + 1)
             .Select(x => new ChannelListChannel(x))
             .ToListAsync();
 
-        return TypedResults.Ok(channels.Count > pageSizeValue
-            ? new ChannelListResponse(channels.GetRange(0, pageSizeValue), channels[^1].ChannelId)
+        return TypedResults.Ok(channels.Count > pageSize
+            ? new ChannelListResponse(channels.GetRange(0, pageSize), channels[^1].ChannelId)
             : new ChannelListResponse(channels, After: null));
     }
 
