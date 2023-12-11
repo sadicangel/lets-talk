@@ -1,4 +1,3 @@
-import type { UserProfileResponse } from "$lib/responses";
 import { writable } from "svelte/store";
 
 export const userProfile$ = function create() {
@@ -23,7 +22,7 @@ export const userProfile$ = function create() {
     }
 }();
 
-export interface UserProfileStore extends UserProfileResponse {
+export interface UserProfileStore {
     userId: string;
     userName: string;
     userAvatar: string;

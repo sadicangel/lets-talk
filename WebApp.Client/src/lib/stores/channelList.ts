@@ -1,8 +1,7 @@
-import type { UserChannelListResponse } from "$lib/responses";
 import { writable } from "svelte/store";
 
 export const channelList$ = function create() {
-    const { subscribe, set, update } = writable<ChannelListStore>({ channels: [] });
+    const { subscribe, set, update } = writable<ChannelListStore>({ channels: {} });
     return {
         subscribe,
         set,
@@ -19,17 +18,11 @@ export const channelList$ = function create() {
     };
 }();
 
-export interface ChannelListStore extends UserChannelListResponse {
-    channels: ChannelStore[]
+export interface ChannelListStore {
+    channels: Record<string, UserChannelListChannel>
 }
 
 export interface UserChannelListChannel {
-    channelId: string;
-    channelName: string;
-    channelIcon: string;
-};
-
-export interface ChannelStore {
     channelId: string;
     channelName: string;
     channelIcon: string;
