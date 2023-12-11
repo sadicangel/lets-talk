@@ -1,7 +1,7 @@
 ﻿using Validot;
 using Validot.Results;
 
-namespace LetsTalk.Channels;
+namespace LetsTalk.Channels.Dtos;
 
 public sealed record class CreateChannelRequest(string ChannelName, string? ChannelIcon);
 

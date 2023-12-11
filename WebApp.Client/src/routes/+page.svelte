@@ -1,142 +1,47 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
-    import {
-        HttpTransportType,
-        HubConnection,
-        HubConnectionBuilder,
-        HubConnectionState
-    } from '@microsoft/signalr';
-    import type {
-        ChannelCreated,
-        ChannelDeleted,
-        ChannelUpdated,
-        MessageBroadcast,
-        NotificationBroadcast,
-        UserConnected,
-        UserDisconnected,
-        UserJoined,
-        UserLeft
-    } from '$lib/events';
-    import type { UserProfile } from '$lib/responses';
     import { encodeText } from '$lib/utf8';
     import Message from '$lib/components/Message.svelte';
-
-    let profile: UserProfile = {
-        userId: '',
-        userName: '',
-        userAvatar: '',
-        channels: []
-    };
-
-    let connection: HubConnection;
-    let isConnnected = false;
-
-    let messages: Record<string, MessageBroadcast[]> = {};
+    import { userProfile$ } from '$lib/stores/userProfiel';
+    import { channelList$ } from '$lib/stores/channelList';
+    import { messageList$ } from '$lib/stores/messageList';
+    import { hubConnection$ } from '$lib/stores/hubConnection';
+    import { hubConnectionStatus$ } from '$lib/stores/hubConnectionStatus';
 
     onMount(async () => {
-        const response = await fetch('/api/account/profile');
-        if (response.ok) {
-            profile = await response.json();
-            connection = new HubConnectionBuilder()
-                .withUrl('/api/letstalk', {
-                    skipNegotiation: true,
-                    transport: HttpTransportType.WebSockets
-                })
-                .build();
+        await userProfile$.fetch();
 
-            connection.onreconnected(() => {
-                isConnnected = true;
-            });
+        await hubConnection$.connect();
 
-            connection.onclose((error) => {
-                if (error) console.error(error);
-                isConnnected = false;
-            });
+        await channelList$.fetch();
 
-            connection.on('OnUserConnected', (event: UserConnected) => {
-                console.log('UserConnected', event);
-            });
+        // TEST CODE:
+        messageList$.push({
+            senderId: 'cb33be51-2342-488d-8882-54028d40d91c',
+            senderAvatar:
+                'https://api.dicebear.com/7.x/fun-emoji/svg?seed=cb33be51-2342-488d-8882-54028d40d91c',
+            senderName: 'other@lt.com',
+            channelId: $channelList$.channels[0].channelId,
+            channelName: 'admins',
+            channelIcon:
+                'https://api.dicebear.com/7.x/shapes/svg?seed=6e5312d6-57e0-4362-925d-a3881c1e5df7',
+            content: encodeText('Odio harum omnis quo labore laborum. Sequi?'),
+            contentType: 'text/plain',
+            eventId: '',
+            eventTimestamp: '',
+            eventType: '',
+            timestamp: new Date().toISOString()
+        });
 
-            connection.on('OnUserDisconnected', (event: UserDisconnected) => {
-                console.log('UserDisconnected', event);
-            });
-
-            connection.on('OnChannelCreated', (event: ChannelCreated) => {
-                console.log('ChannelCreated', event);
-            });
-
-            connection.on('OnChannelUpdated', (event: ChannelUpdated) => {
-                console.log('ChannelUpdated', event);
-            });
-
-            connection.on('OnChannelDeleted', (event: ChannelDeleted) => {
-                console.log('ChannelDeleted', event);
-            });
-
-            connection.on('OnUserJoined', (event: UserJoined) => {
-                console.log('UserJoined', event);
-            });
-
-            connection.on('OnUserLeft', (event: UserLeft) => {
-                console.log('UserLeft', event);
-            });
-
-            connection.on('OnMessageBroadcast', (event: MessageBroadcast) => {
-                console.log('MessageBroadcast', event);
-                const list = (messages[event.channelId] = messages[event.channelId] || []);
-                list.push(event);
-                messages = messages;
-            });
-
-            connection.on('OnNotificationBroadcast', (event: NotificationBroadcast) => {
-                console.log('NotificationBroadcast', event);
-            });
-
-            await connectToHub();
-
-            const list = (messages[profile.channels[0].channelId] =
-                messages[profile.channels[0].channelId] || []);
-            list.push({
-                senderId: 'cb33be51-2342-488d-8882-54028d40d91c',
-                senderAvatar:
-                    'https://api.dicebear.com/7.x/fun-emoji/svg?seed=cb33be51-2342-488d-8882-54028d40d91c',
-                senderName: 'other@lt.com',
-                channelId: '6e5312d6-57e0-4362-925d-a3881c1e5df7',
-                channelName: 'admins',
-                channelIcon:
-                    'https://api.dicebear.com/7.x/shapes/svg?seed=6e5312d6-57e0-4362-925d-a3881c1e5df7',
-                content: encodeText('Odio harum omnis quo labore laborum. Sequi?'),
-                contentType: 'text/plain',
-                eventId: '',
-                eventTimestamp: '',
-                eventType: '',
-                timestamp: new Date().toISOString()
-            });
-            messages = messages;
-
-            await connection.send(
-                'SendMessage',
-                profile.channels[0].channelId,
-                'text/plain',
-                encodeText('Lorem ipsum dolor sit amet consectetur adipisicing elit.')
-            );
-        } else {
-            console.error(await response.text());
-        }
+        await $hubConnection$.send(
+            'SendMessage',
+            $channelList$.channels[0].channelId,
+            'text/plain',
+            encodeText('Lorem ipsum dolor sit amet consectetur adipisicing elit.')
+        );
     });
 
-    onDestroy(async () => await disconnectFromHub());
-
-    async function connectToHub() {
-        await connection.start();
-        isConnnected = connection.state == HubConnectionState.Connected;
-    }
-
-    async function disconnectFromHub() {
-        if (connection) {
-            await connection.stop();
-        }
-    }
+    onDestroy(async () => hubConnection$.disconnect());
 
     let createChannelName = undefined as unknown as string;
 
@@ -178,13 +83,13 @@
     let joinChannelId = undefined as unknown as string;
 
     async function joinChannel() {
-        await connection.send('JoinChannel', joinChannelId);
+        await $hubConnection$.send('JoinChannel', joinChannelId);
     }
 
     let leaveChannelId = undefined as unknown as string;
 
     async function leaveChannel() {
-        await connection.send('LeaveChannel', leaveChannelId);
+        await $hubConnection$.send('LeaveChannel', leaveChannelId);
     }
 
     const sendContentTypeList = ['text/plain', 'application/json'];
@@ -193,7 +98,7 @@
     let sendContent = undefined as unknown as string;
 
     async function sendMessage() {
-        await connection.send(
+        await $hubConnection$.send(
             'SendMessage',
             sendChannelId,
             sendContentType,
@@ -203,16 +108,17 @@
 </script>
 
 <h1>Let's Talk</h1>
-{#if profile?.userId}
-    <div>{profile.userName}</div>
-    <img src={profile.userAvatar} alt="avatar" width="128" />
+{#if $userProfile$?.userId}
+    <div>{$userProfile$.userName}</div>
+    <img src={$userProfile$.userAvatar} alt="avatar" width="128" />
 {/if}
-<pre>{JSON.stringify(profile, undefined, 2)}</pre>
+<pre>{JSON.stringify($userProfile$, undefined, 2)}</pre>
+<pre>{JSON.stringify($channelList$, undefined, 2)}</pre>
 
-{#if isConnnected}
+{#if $hubConnectionStatus$.isConnected}
     <div>
         <span>status: ✅</span>
-        <button on:click={disconnectFromHub}>Disconnect from chat</button>
+        <button on:click={hubConnection$.disconnect}>Disconnect from chat</button>
     </div>
     <div>
         <input type="text" placeholder="channel name" bind:value={createChannelName} />
@@ -251,13 +157,16 @@
         >
     </div>
     <div>
-        {#each profile.channels as channel}
+        {#each $channelList$.channels as channel}
             <div class="text-xl">{channel.channelName}</div>
-            {#if Array.isArray(messages[channel.channelId])}
+            {#if Array.isArray($messageList$[channel.channelId])}
                 <ul>
-                    {#each messages[channel.channelId] as message}
+                    {#each $messageList$[channel.channelId] as message}
                         <li>
-                            <Message {message} justifyStart={message.senderId !== profile.userId} />
+                            <Message
+                                {message}
+                                justifyStart={message.senderId !== $userProfile$.userId}
+                            />
                         </li>
                     {/each}
                 </ul>
@@ -267,6 +176,6 @@
 {:else}
     <div>
         <span>status: ❌</span>
-        <button on:click={connectToHub}>Connect to chat</button>
+        <button on:click={hubConnection$.connect}>Connect to chat</button>
     </div>
 {/if}
