@@ -77,20 +77,6 @@
     async function leaveChannel() {
         await $hubConnection$.send('LeaveChannel', leaveChannelId);
     }
-
-    const sendContentTypeList = ['text/plain', 'application/json'];
-    let sendChannelId = undefined as unknown as string;
-    let sendContentType = 'text/plain';
-    let sendContent = undefined as unknown as string;
-
-    async function sendMessage() {
-        await $hubConnection$.send(
-            'SendMessage',
-            sendChannelId,
-            sendContentType,
-            encodeText(sendContent)
-        );
-    }
 </script>
 
 <h1>Let's Talk</h1>
@@ -127,20 +113,6 @@
     <div>
         <input type="text" placeholder="channel id" bind:value={leaveChannelId} />
         <button disabled={!leaveChannelId} on:click={leaveChannel}>Leave Channel</button>
-    </div>
-    <div>
-        <input type="text" placeholder="channel id" bind:value={sendChannelId} />
-        <select bind:value={sendContentType}>
-            {#each sendContentTypeList as contentType}
-                <option value={contentType}>
-                    {contentType}
-                </option>
-            {/each}
-        </select>
-        <input type="text" placeholder="content" bind:value={sendContent} />
-        <button disabled={!sendContent || !sendChannelId} on:click={sendMessage}
-            >Send Message</button
-        >
     </div>
     <div>
         {#each Object.keys($channelList$.channels) as channelId}
