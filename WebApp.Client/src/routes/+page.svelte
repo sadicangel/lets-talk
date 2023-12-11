@@ -1,13 +1,13 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import { encodeText } from '$lib/utf8';
-    import Message from '$lib/components/Message.svelte';
     import { userProfile$ } from '$lib/stores/userProfiel';
     import { channelList$ } from '$lib/stores/channelList';
     import { messageList$ } from '$lib/stores/messageList';
     import { hubConnection$ } from '$lib/stores/hubConnection';
     import { hubConnectionStatus$ } from '$lib/stores/hubConnectionStatus';
     import api from '$lib/api';
+    import Channel from '$lib/components/Channel.svelte';
 
     onMount(async () => {
         await userProfile$.fetch();
@@ -143,20 +143,8 @@
         >
     </div>
     <div>
-        {#each $channelList$.channels as channel}
-            <div class="text-xl">{channel.channelName}</div>
-            {#if Array.isArray($messageList$[channel.channelId])}
-                <ul>
-                    {#each $messageList$[channel.channelId] as message}
-                        <li>
-                            <Message
-                                {message}
-                                justifyStart={message.senderId !== $userProfile$.userId}
-                            />
-                        </li>
-                    {/each}
-                </ul>
-            {/if}
+        {#each Object.keys($channelList$.channels) as channelId}
+            <Channel {channelId} />
         {/each}
     </div>
 {:else}
