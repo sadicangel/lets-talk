@@ -2,12 +2,13 @@
     import { onDestroy, onMount } from 'svelte';
     import { encodeText } from '$lib/utf8';
     import { userProfile$ } from '$lib/stores/userProfiel';
-    import { channelList$ } from '$lib/stores/channelList';
+    import { channelList$, type UserChannelListChannel } from '$lib/stores/channelList';
     import { messageList$ } from '$lib/stores/messageList';
     import { hubConnection$ } from '$lib/stores/hubConnection';
     import { hubConnectionStatus$ } from '$lib/stores/hubConnectionStatus';
-    import api from '$lib/api';
     import Channel from '$lib/components/Channel.svelte';
+    import ChannelList from '$lib/components/ChannelList.svelte';
+    import api from '$lib/api';
 
     onMount(async () => {
         await userProfile$.fetch();
@@ -43,6 +44,8 @@
     });
 
     onDestroy(async () => hubConnection$.disconnect());
+
+    let selectedChannel: UserChannelListChannel | undefined = undefined;
 
     let createChannelName = undefined as unknown as string;
 
@@ -115,9 +118,12 @@
         <button disabled={!leaveChannelId} on:click={leaveChannel}>Leave Channel</button>
     </div>
     <div>
-        {#each Object.keys($channelList$.channels) as channelId}
-            <Channel {channelId} />
-        {/each}
+        <ChannelList on:channelSelected={(e) => (selectedChannel = e.detail)} />
+    </div>
+    <div>
+        {#if selectedChannel}
+            <Channel channelId={selectedChannel.channelId} />
+        {/if}
     </div>
 {:else}
     <div>

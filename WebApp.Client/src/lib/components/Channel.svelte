@@ -5,6 +5,7 @@
     import { userProfile$ } from '$lib/stores/userProfiel';
     import { encodeText } from '$lib/utf8';
     import Message from './Message.svelte';
+    import { Avatar } from '@skeletonlabs/skeleton';
 
     export let channelId: string;
 
@@ -27,8 +28,13 @@
     <header
         class="p-3 variant-filled-surface text-2xl font-semibold uppercase flex items-center justify-start"
     >
-        <div class="h-10 w-10 mr-2">
-            <img src={channel.channelIcon} alt="{channel.channelName} Icon" />
+        <div class="mr-2">
+            <Avatar
+                src={channel.channelIcon}
+                alt="{channel.channelName} Icon"
+                rounded="rounded-xl"
+                width="w-10"
+            />
         </div>
         <div class="">
             <p>{channel.channelName}</p>
