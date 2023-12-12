@@ -57,7 +57,7 @@ app.MapHub<AppHub>("/letstalk");
             dbContext.Database.EnsureCreated();
         });
 
-    var userId = Uuid7.Create();
+    var userId = Uuid.Create();
     var user = new User
     {
         Id = userId,
@@ -79,16 +79,18 @@ app.MapHub<AppHub>("/letstalk");
     };
 
     dbContext.Users.Add(user);
-    var channelId = Uuid7.Create();
-    dbContext.Channels.Add(new Channel
+    foreach (var (index, channelId) in Enumerable.Range(0, 3).Select(i => (index: i + 1, uuid: Uuid.Create())))
     {
-        Id = channelId,
-        DisplayName = "admins",
-        Icon = $"https://api.dicebear.com/7.x/shapes/svg?seed={channelId}",
-        Admin = user,
-        AdminId = user.Id,
-        Participants = [user]
-    });
+        dbContext.Channels.Add(new Channel
+        {
+            Id = channelId,
+            DisplayName = $"Channel {index}",
+            Icon = $"https://api.dicebear.com/7.x/shapes/svg?seed={channelId}",
+            Admin = user,
+            AdminId = user.Id,
+            Participants = [user]
+        });
+    }
     dbContext.SaveChanges();
     var channels = dbContext.Channels.Include(c => c.Participants).ToList();
 }

@@ -98,7 +98,7 @@ public sealed class AppHub(AppDbContext dbContext, HubConnectionManager connecti
 
         var message = new Message
         {
-            Id = Uuid7.Create(),
+            Id = Uuid.Create(),
             Channel = channel,
             ChannelId = channel.Id,
             Sender = user,

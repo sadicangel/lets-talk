@@ -12,8 +12,12 @@ export const channelList$ = function create() {
                 console.error(channelListResponse);
                 return;
             }
-
-            set(await channelListResponse.json());
+            const channels: Array<UserChannelListChannel> = (await channelListResponse.json()).channels;
+            update(s => {
+                for (const channel of channels)
+                    s.channels[channel.channelId] = channel;
+                return s;
+            });
         }
     };
 }();

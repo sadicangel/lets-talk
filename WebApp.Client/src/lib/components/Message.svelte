@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { MessageBroadcast } from '$lib/events';
     import { decodeText } from '$lib/utf8';
+    import { Avatar } from '@skeletonlabs/skeleton';
 
     export let message: MessageBroadcast;
     export let justifyStart: boolean;
@@ -22,8 +23,8 @@
 
 <div class="message {justifyStart ? 'justify-start' : 'justify-end'}">
     {#if justifyStart}
-        <div class="message-image mr-2">
-            <img src={message.senderAvatar} alt="{message.senderName} Avatar" />
+        <div class="mr-2">
+            <Avatar src={message.senderAvatar} alt="{message.senderName} Avatar" width="w-8" />
         </div>
     {/if}
     <div
@@ -38,8 +39,8 @@
         {/if}
     </div>
     {#if !justifyStart}
-        <div class="message-image ml-2">
-            <img src={message.senderAvatar} alt="{message.senderName} Avatar" />
+        <div class="ml-2">
+            <Avatar src={message.senderAvatar} alt="{message.senderName} Avatar" width="w-8" />
         </div>
     {/if}
 </div>
@@ -47,14 +48,6 @@
 <style lang="postcss">
     .message {
         @apply mb-4 flex cursor-pointer items-center;
-    }
-
-    .message-image {
-        @apply flex h-9 w-9 items-center justify-center rounded-full;
-    }
-
-    .message-image img {
-        @apply h-8 w-8 rounded-full;
     }
 
     .message-text {

@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 
 namespace LetsTalk.Services;
 
-public static class Uuid7
+public static class Uuid
 {
     public static string Create()
     {
