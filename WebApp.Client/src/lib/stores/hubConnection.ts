@@ -83,7 +83,7 @@ export const hubConnection$ = function create() {
     return {
         subscribe,
         connect: async () => {
-            if (!browser) return;
+            if (!connection) return;
             await connection.start();
             hubConnectionStatus$.set({
                 isConnected: connection.state === HubConnectionState.Connected,
@@ -91,7 +91,7 @@ export const hubConnection$ = function create() {
             });
         },
         disconnect: async () => {
-            if (!browser) return;
+            if (!connection) return;
             await connection.stop();
         }
     };
