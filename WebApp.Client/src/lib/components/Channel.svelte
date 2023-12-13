@@ -47,7 +47,8 @@
             {/each}
         {/if}
     </div>
-    <footer class="p-4 pt-6 pb-5 absolute w-full variant-filled-surface">
+    <!-- TODO: fix element position -->
+    <footer class="p-4 absolute w-4/6 items-center bottom-3 variant-filled-surface">
         <div class="flex items-center">
             <input
                 type="text"

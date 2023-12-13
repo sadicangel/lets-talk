@@ -1,20 +1,30 @@
 <script lang="ts">
-  import { channelList$, type UserChannelListChannel } from '$lib/stores/channelList';
+  import { goto } from '$app/navigation';
+  import { channelList$ } from '$lib/stores/channelList';
   import { Avatar, ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
-  import { createEventDispatcher } from 'svelte';
-
-  const dispatch = createEventDispatcher<{ channelSelected: UserChannelListChannel }>();
 
   let selectedChannelId: string = undefined as any;
 
   function selectChannel() {
-    dispatch('channelSelected', $channelList$.channels[selectedChannelId]);
+    goto(`/${selectedChannelId}`);
+  }
+
+  $: channels = Object.values($channelList$.channels) || [];
+
+  // Select the first channel automatically.
+  $: {
+    if (!selectedChannelId) {
+      if (channels && channels.length > 0) {
+        selectedChannelId = channels[0].channelId;
+        selectChannel();
+      }
+    }
   }
 </script>
 
 <div class="w-full card p-4 text-token">
   <ListBox
-    >{#each Object.values($channelList$.channels) as channel}
+    >{#each channels as channel}
       <ListBoxItem
         bind:group={selectedChannelId}
         name={channel.channelId}

@@ -1,100 +1,42 @@
 <script lang="ts">
-    import { onDestroy, onMount } from 'svelte';
-    import { encodeText } from '$lib/utf8';
-    import { userProfile$ } from '$lib/stores/userProfiel';
-    import { channelList$, type UserChannelListChannel } from '$lib/stores/channelList';
-    import { messageList$ } from '$lib/stores/messageList';
-    import { hubConnection$ } from '$lib/stores/hubConnection';
-    import { hubConnectionStatus$ } from '$lib/stores/hubConnectionStatus';
-    import Channel from '$lib/components/Channel.svelte';
-    import ChannelList from '$lib/components/ChannelList.svelte';
-    import api from '$lib/api';
+    // let createChannelName = undefined as unknown as string;
 
-    onMount(async () => {
-        await userProfile$.fetch();
+    // async function createChannel() {
+    //     console.log(await api.channel.create(createChannelName));
+    // }
 
-        await hubConnection$.connect();
+    // let updateChannelId = undefined as unknown as string;
+    // let updateChannelName = undefined as unknown as string;
+    // let updateChannelIcon = undefined as unknown as string;
 
-        await channelList$.fetch();
+    // async function updateChannel() {
+    //     console.log(
+    //         await api.channel.update(updateChannelId, updateChannelName, updateChannelIcon)
+    //     );
+    // }
 
-        // TEST CODE:
-        messageList$.push({
-            senderId: 'cb33be51-2342-488d-8882-54028d40d91c',
-            senderAvatar:
-                'https://api.dicebear.com/7.x/fun-emoji/svg?seed=cb33be51-2342-488d-8882-54028d40d91c',
-            senderName: 'other@lt.com',
-            channelId: $channelList$.channels[0].channelId,
-            channelName: 'admins',
-            channelIcon:
-                'https://api.dicebear.com/7.x/shapes/svg?seed=6e5312d6-57e0-4362-925d-a3881c1e5df7',
-            content: encodeText('Odio harum omnis quo labore laborum. Sequi?'),
-            contentType: 'text/plain',
-            eventId: '',
-            eventTimestamp: '',
-            eventType: '',
-            timestamp: new Date().toISOString()
-        });
+    // let deleteChannelId = undefined as unknown as string;
 
-        await $hubConnection$.send(
-            'SendMessage',
-            $channelList$.channels[0].channelId,
-            'text/plain',
-            encodeText('Lorem ipsum dolor sit amet consectetur adipisicing elit.')
-        );
-    });
+    // async function deleteChannel() {
+    //     console.log(await api.channel.delete(deleteChannelId));
+    // }
 
-    onDestroy(async () => hubConnection$.disconnect());
+    // let joinChannelId = undefined as unknown as string;
 
-    let selectedChannel: UserChannelListChannel | undefined = undefined;
+    // async function joinChannel() {
+    //     await $hubConnection$.send('JoinChannel', joinChannelId);
+    // }
 
-    let createChannelName = undefined as unknown as string;
+    // let leaveChannelId = undefined as unknown as string;
 
-    async function createChannel() {
-        console.log(await api.channel.create(createChannelName));
-    }
-
-    let updateChannelId = undefined as unknown as string;
-    let updateChannelName = undefined as unknown as string;
-    let updateChannelIcon = undefined as unknown as string;
-
-    async function updateChannel() {
-        console.log(
-            await api.channel.update(updateChannelId, updateChannelName, updateChannelIcon)
-        );
-    }
-
-    let deleteChannelId = undefined as unknown as string;
-
-    async function deleteChannel() {
-        console.log(await api.channel.delete(deleteChannelId));
-    }
-
-    let joinChannelId = undefined as unknown as string;
-
-    async function joinChannel() {
-        await $hubConnection$.send('JoinChannel', joinChannelId);
-    }
-
-    let leaveChannelId = undefined as unknown as string;
-
-    async function leaveChannel() {
-        await $hubConnection$.send('LeaveChannel', leaveChannelId);
-    }
+    // async function leaveChannel() {
+    //     await $hubConnection$.send('LeaveChannel', leaveChannelId);
+    // }
 </script>
 
-<h1>Let's Talk</h1>
-{#if $userProfile$?.userId}
-    <div>{$userProfile$.userName}</div>
-    <img src={$userProfile$.userAvatar} alt="avatar" width="128" />
-{/if}
-<pre>{JSON.stringify($userProfile$, undefined, 2)}</pre>
-<pre>{JSON.stringify($channelList$, undefined, 2)}</pre>
+<div class="text-4xl">Welcome to Let's Talk</div>
 
-{#if $hubConnectionStatus$.isConnected}
-    <div>
-        <span>status: ✅</span>
-        <button on:click={hubConnection$.disconnect}>Disconnect from chat</button>
-    </div>
+<!-- {#if $hubConnectionStatus$.isConnected}
     <div>
         <input type="text" placeholder="channel name" bind:value={createChannelName} />
         <button disabled={!createChannelName} on:click={createChannel}>Create Channel</button>
@@ -118,16 +60,8 @@
         <button disabled={!leaveChannelId} on:click={leaveChannel}>Leave Channel</button>
     </div>
     <div>
-        <ChannelList on:channelSelected={(e) => (selectedChannel = e.detail)} />
-    </div>
-    <div>
         {#if selectedChannel}
             <Channel channelId={selectedChannel.channelId} />
         {/if}
     </div>
-{:else}
-    <div>
-        <span>status: ❌</span>
-        <button on:click={hubConnection$.connect}>Connect to chat</button>
-    </div>
-{/if}
+{/if} -->
