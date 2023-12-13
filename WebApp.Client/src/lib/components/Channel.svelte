@@ -24,10 +24,9 @@
     }
 </script>
 
-<div class="flex-1 bg-surface-50">
-    <header
-        class="p-3 variant-filled-surface text-2xl font-semibold uppercase flex items-center justify-start"
-    >
+<!-- TODO: fix max height -->
+<div class="bg-surface-50 relative">
+    <header class="p-3 variant-filled-surface text-2xl font-semibold uppercase">
         <div class="mr-2">
             <Avatar
                 src={channel.channelIcon}
@@ -48,7 +47,7 @@
         {/if}
     </div>
     <!-- TODO: fix element position -->
-    <footer class="p-4 absolute w-4/6 items-center bottom-3 variant-filled-surface">
+    <footer class="p-4 absolute w-full items-center bottom-0 variant-filled-surface">
         <div class="flex items-center">
             <input
                 type="text"

@@ -6,20 +6,10 @@
   let selectedChannelId: string = undefined as any;
 
   function selectChannel() {
-    goto(`/${selectedChannelId}`);
+    goto(`/chat/${selectedChannelId}`);
   }
 
   $: channels = Object.values($channelList$.channels) || [];
-
-  // Select the first channel automatically.
-  $: {
-    if (!selectedChannelId) {
-      if (channels && channels.length > 0) {
-        selectedChannelId = channels[0].channelId;
-        selectChannel();
-      }
-    }
-  }
 </script>
 
 <div class="w-full card p-4 text-token">

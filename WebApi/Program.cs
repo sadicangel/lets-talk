@@ -2,7 +2,6 @@ using LetsTalk;
 using LetsTalk.Account;
 using LetsTalk.Channels;
 using LetsTalk.Services;
-using Microsoft.EntityFrameworkCore;
 using Polly;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -79,12 +78,12 @@ app.MapHub<AppHub>("/letstalk");
     };
 
     dbContext.Users.Add(user);
-    foreach (var (index, channelId) in Enumerable.Range(0, 3).Select(i => (index: i + 1, uuid: Uuid.Create())))
+    foreach (var (index, channelId) in Enumerable.Range(0, 3).Select(i => (index: i, uuid: Uuid.Create())))
     {
         dbContext.Channels.Add(new Channel
         {
             Id = channelId,
-            DisplayName = $"Channel {index}",
+            DisplayName = $"Channel {(char)('A' + index)}",
             Icon = $"https://api.dicebear.com/7.x/shapes/svg?seed={channelId}",
             Admin = user,
             AdminId = user.Id,
@@ -92,6 +91,5 @@ app.MapHub<AppHub>("/letstalk");
         });
     }
     dbContext.SaveChanges();
-    var channels = dbContext.Channels.Include(c => c.Participants).ToList();
 }
 app.Run();

@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
+
     // let createChannelName = undefined as unknown as string;
 
     // async function createChannel() {
@@ -34,7 +36,8 @@
     // }
 </script>
 
-<div class="text-4xl">Welcome to Let's Talk</div>
+<div class="text-4xl self-center text-center">Welcome to Let's Talk</div>
+<button class="variant-filled-primary" on:click={() => goto('/chat')}>Go to chat</button>
 
 <!-- {#if $hubConnectionStatus$.isConnected}
     <div>
