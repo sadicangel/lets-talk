@@ -88,7 +88,7 @@ public sealed class AppHub(AppDbContext dbContext, HubConnectionManager connecti
         }
     }
 
-    public async Task SendMessage(string channelId, string contentType, byte[] content)
+    public async Task SendMessage(string channelId, ContentType contentType, byte[] content)
     {
         var user = await dbContext.Users
             .SingleAsync(x => x.Id == Context.UserIdentifier!);

@@ -27,7 +27,7 @@
             contentType: 'text/plain',
             eventId: '',
             eventTimestamp: '',
-            eventType: '',
+            eventType: 'MessageBroadcast',
             timestamp: new Date().toISOString()
         });
 
@@ -38,6 +38,10 @@
             encodeText('Lorem ipsum dolor sit amet consectetur adipisicing elit.')
         );
     });
+
+    async function triggerServerNotification() {
+        await fetch(`/api/test/notification?message=Server Message @${new Date().toISOString()}`);
+    }
 </script>
 
 <AppShell
@@ -63,20 +67,26 @@
 
     <!-- Right SideBar-->
     <svelte:fragment slot="sidebarRight">
-        <div class="flex flex-row m-2 max-h-8 gap-2 items-center">
-            {#if $hubConnectionStatus$.isConnected}
-                <span>status: ✅</span>
-                <button
-                    class="flex-1 button-base-styles variant-filled rounded-lg"
-                    on:click={hubConnection$.disconnect}>Disconnect from chat</button
-                >
-            {:else}
-                <span>status: ❌</span>
-                <button
-                    class="basis-2/3 button-base-styles variant-filled rounded-lg"
-                    on:click={hubConnection$.connect}>Connect to chat</button
-                >
-            {/if}
+        <div class="flex flex-col m-2 max-h-8 gap-2 items-center">
+            <div class="flex flex-row m-2 max-h-8 gap-2 items-center">
+                {#if $hubConnectionStatus$.isConnected}
+                    <span>status: ✅</span>
+                    <button
+                        class="flex-1 button-base-styles variant-filled rounded-lg"
+                        on:click={hubConnection$.disconnect}>Disconnect from chat</button
+                    >
+                {:else}
+                    <span>status: ❌</span>
+                    <button
+                        class="basis-2/3 button-base-styles variant-filled rounded-lg"
+                        on:click={hubConnection$.connect}>Connect to chat</button
+                    >
+                {/if}
+            </div>
+            <button
+                class="basis-2/3 button-base-styles variant-filled rounded-lg"
+                on:click={triggerServerNotification}>Trigger server notification</button
+            >
         </div>
     </svelte:fragment>
 </AppShell>

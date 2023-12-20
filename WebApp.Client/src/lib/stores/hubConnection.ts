@@ -9,7 +9,7 @@ import { messageList$ } from "./messageList";
 export const hubConnection$ = function create() {
     let connection: HubConnection;
     const { subscribe } = writable<HubConnection>({} as any, (set) => {
-        if (browser) {
+        if (browser && !connection) {
             connection = new HubConnectionBuilder()
                 .withUrl('/api/letstalk', {
                     skipNegotiation: true,
@@ -83,9 +83,10 @@ export const hubConnection$ = function create() {
     return {
         subscribe,
         connect: async () => {
-            if (!connection) return;
+            if (!connection || connection.state === HubConnectionState.Connected) return;
             await connection.start();
             hubConnectionStatus$.set({
+                // @ts-expect-error
                 isConnected: connection.state === HubConnectionState.Connected,
                 state: connection.state
             });

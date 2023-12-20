@@ -6,7 +6,7 @@ public sealed record class MessageBroadcast(
     string ChannelId,
     string ChannelName,
     string ChannelIcon,
-    string ContentType,
+    ContentType ContentType,
     byte[] Content,
     DateTimeOffset Timestamp)
     : EventBase(Guid.NewGuid().ToString(), typeof(MessageBroadcast).Name, DateTimeOffset.UtcNow)
