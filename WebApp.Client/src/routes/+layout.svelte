@@ -1,8 +1,36 @@
 <script lang="ts">
+    import { Toast, getToastStore, initializeStores } from '@skeletonlabs/skeleton';
     import { AppBar, AppShell, Avatar } from '@skeletonlabs/skeleton';
     import '../app.pcss';
     import { onMount } from 'svelte';
-    import { userProfile$ } from '$lib/stores/userProfiel';
+    import { userProfile$ } from '$lib/stores/userProfile';
+    import { hubNotification$ } from '$lib/stores/hubNotification';
+
+    initializeStores();
+
+    const toastStore = getToastStore();
+
+    hubNotification$.subscribe((notification) => {
+        if (!notification) {
+            return;
+        }
+        switch (notification.eventType) {
+            case 'UserConnected':
+                toastStore.trigger({
+                    message: `${notification.userName} is online`,
+                    timeout: 5000,
+                    background: 'variant-filled-primary'
+                });
+                return;
+            case 'NotificationBroadcast':
+                toastStore.trigger({
+                    message: notification.content,
+                    timeout: 5000,
+                    background: 'variant-filled-warning'
+                });
+                return;
+        }
+    });
 
     onMount(async () => {
         await userProfile$.fetch();
@@ -10,6 +38,8 @@
 
     //onDestroy(async () => hubConnection$.disconnect());
 </script>
+
+<Toast position="br" />
 
 <AppShell
     class="card h-full p-1"

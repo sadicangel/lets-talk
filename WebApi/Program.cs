@@ -1,7 +1,9 @@
 using LetsTalk;
 using LetsTalk.Account;
 using LetsTalk.Channels;
+using LetsTalk.Events;
 using LetsTalk.Services;
+using Microsoft.AspNetCore.SignalR;
 using Polly;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +36,16 @@ if (app.Environment.IsDevelopment())
 {
     app.MapSwagger();
     app.UseSwaggerUI();
+    app.MapGet("test/notification", async (string message, IHubContext<AppHub, IAppHubClient> hubContext) =>
+    {
+        await hubContext.Clients.All.OnNotificationBroadcast(new NotificationBroadcast(
+            message,
+            DateTimeOffset.UtcNow
+        ));
+
+        return TypedResults.Ok();
+    });
+
 }
 
 app.UseHttpsRedirection();
