@@ -35,8 +35,6 @@
     onMount(async () => {
         await userProfile$.fetch();
     });
-
-    //onDestroy(async () => hubConnection$.disconnect());
 </script>
 
 <Toast position="br" />
@@ -52,7 +50,8 @@
         <AppBar class="w-full text-primary-100" background="bg-secondary-900">
             <svelte:fragment slot="trail">
                 <div class="flex flex-row gap-2 items-end absolute right-0 mr-4">
-                    {#if $userProfile$?.userId}
+                    {#if $userProfile$}
+                        <div><a href="/logout">Logout</a></div>
                         <div>{$userProfile$.userName}</div>
                         <div>
                             <Avatar
@@ -62,6 +61,8 @@
                                 width="w-10"
                             />
                         </div>
+                    {:else}
+                        <div><a href="/login">Login</a></div>
                     {/if}
                 </div>
             </svelte:fragment>

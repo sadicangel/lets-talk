@@ -1,11 +1,7 @@
 import { writable } from "svelte/store";
 
 export const userProfile$ = function create() {
-    const { subscribe, set, update } = writable<UserProfileStore>({
-        userId: '',
-        userName: '',
-        userAvatar: ''
-    });
+    const { subscribe, set, update } = writable<UserProfileStore>();
 
     return {
         subscribe,
@@ -17,7 +13,9 @@ export const userProfile$ = function create() {
                 console.error(userProfileResponse);
                 return;
             }
-            set(await userProfileResponse.json());
+            const profile: UserProfileStore = await userProfileResponse.json();
+            set(profile);
+            return profile;
         }
     }
 }();

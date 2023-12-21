@@ -5,20 +5,7 @@ export const channelList$ = function create() {
     return {
         subscribe,
         set,
-        update,
-        fetch: async () => {
-            const channelListResponse = await fetch('/api/account/channels');
-            if (!channelListResponse.ok) {
-                console.error(channelListResponse);
-                return;
-            }
-            const channels: Array<UserChannelListChannel> = (await channelListResponse.json()).channels;
-            update(s => {
-                for (const channel of channels)
-                    s.channels[channel.channelId] = channel;
-                return s;
-            });
-        }
+        update
     };
 }();
 

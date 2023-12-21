@@ -1,16 +1,17 @@
 <script lang="ts">
+    import RedirectGuard from '$lib/components/RedirectGuard.svelte';
     import ChannelList from '$lib/components/ChannelList.svelte';
     import { channelList$ } from '$lib/stores/channelList';
     import { hubConnection$ } from '$lib/stores/hubConnection';
     import { hubConnectionStatus$ } from '$lib/stores/hubConnectionStatus';
     import { messageList$ } from '$lib/stores/messageList';
+    import { userProfile$ } from '$lib/stores/userProfile';
     import { encodeText } from '$lib/utf8';
     import { AppShell } from '@skeletonlabs/skeleton';
     import { onMount } from 'svelte';
 
     onMount(async () => {
         await hubConnection$.connect();
-        await channelList$.fetch();
 
         // TEST CODE:
         const firstChannel = Object.values($channelList$.channels)[0];
@@ -44,49 +45,51 @@
     }
 </script>
 
-<AppShell
-    class="card h-full p-1"
-    slotSidebarLeft="grid grid-cols-1 w-1/6"
-    slotSidebarRight="grid grid-cols-1 w-1/6"
-    slotPageContent="grid grid-cols-1"
->
-    <!-- Left SideBar-->
-    <svelte:fragment slot="sidebarLeft">
-        <div class="flex flex-col">
-            <div class="flex-1">
-                <ChannelList />
+<RedirectGuard redirectUrl="/login" canPassGuard={!!$userProfile$}>
+    <AppShell
+        class="card h-full p-1"
+        slotSidebarLeft="grid grid-cols-1 w-1/6"
+        slotSidebarRight="grid grid-cols-1 w-1/6"
+        slotPageContent="grid grid-cols-1"
+    >
+        <!-- Left SideBar-->
+        <svelte:fragment slot="sidebarLeft">
+            <div class="flex flex-col">
+                <div class="flex-1">
+                    <ChannelList />
+                </div>
+                <div class="flex-none text-center variant-filled-primary">
+                    Channel settings placeholder
+                </div>
             </div>
-            <div class="flex-none text-center variant-filled-primary">
-                Channel settings placeholder
-            </div>
-        </div>
-    </svelte:fragment>
+        </svelte:fragment>
 
-    <!-- Router Slot -->
-    <slot />
+        <!-- Router Slot -->
+        <slot />
 
-    <!-- Right SideBar-->
-    <svelte:fragment slot="sidebarRight">
-        <div class="flex flex-col m-2 max-h-8 gap-2 items-center">
-            <div class="flex flex-row m-2 max-h-8 gap-2 items-center">
-                {#if $hubConnectionStatus$.isConnected}
-                    <span>status: ✅</span>
-                    <button
-                        class="flex-1 button-base-styles variant-filled rounded-lg"
-                        on:click={hubConnection$.disconnect}>Disconnect from chat</button
-                    >
-                {:else}
-                    <span>status: ❌</span>
-                    <button
-                        class="basis-2/3 button-base-styles variant-filled rounded-lg"
-                        on:click={hubConnection$.connect}>Connect to chat</button
-                    >
-                {/if}
+        <!-- Right SideBar-->
+        <svelte:fragment slot="sidebarRight">
+            <div class="flex flex-col m-2 max-h-8 gap-2 items-center">
+                <div class="flex flex-row m-2 max-h-8 gap-2 items-center">
+                    {#if $hubConnectionStatus$.isConnected}
+                        <span>status: ✅</span>
+                        <button
+                            class="flex-1 button-base-styles variant-filled rounded-lg"
+                            on:click={hubConnection$.disconnect}>Disconnect from chat</button
+                        >
+                    {:else}
+                        <span>status: ❌</span>
+                        <button
+                            class="basis-2/3 button-base-styles variant-filled rounded-lg"
+                            on:click={hubConnection$.connect}>Connect to chat</button
+                        >
+                    {/if}
+                </div>
+                <button
+                    class="basis-2/3 button-base-styles variant-filled rounded-lg"
+                    on:click={triggerServerNotification}>Trigger server notification</button
+                >
             </div>
-            <button
-                class="basis-2/3 button-base-styles variant-filled rounded-lg"
-                on:click={triggerServerNotification}>Trigger server notification</button
-            >
-        </div>
-    </svelte:fragment>
-</AppShell>
+        </svelte:fragment>
+    </AppShell>
+</RedirectGuard>
