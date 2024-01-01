@@ -1,11 +1,8 @@
-using LetsTalk;
 using Yarp.ReverseProxy.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
-
-builder.Services.AddSingleton<AccessTokenProvider>();
 
 builder.Services.AddReverseProxy()
     .LoadFromMemory([
@@ -15,7 +12,6 @@ builder.Services.AddReverseProxy()
             ClusterId = "api_cluster",
             Match = new RouteMatch { Path = "{**catch-all}" }
         }
-        //.WithTransformPathRemovePrefix("/api")
     ],
     [
         new ClusterConfig
@@ -47,13 +43,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapReverseProxy(opts => opts.Use(async (context, next) =>
+app.MapReverseProxy(/*opts => opts.Use(async (context, next) =>
 {
     var accessTokenProvider = context.RequestServices.GetRequiredService<AccessTokenProvider>();
     var accessTokenResponse = await accessTokenProvider.ProvideAccessTokenAsync();
     context.Request.Headers.Authorization = $"Bearer {accessTokenResponse.AccessToken}";
     await next(context);
-}));
+})*/);
 
 app.MapFallbackToFile("/index.html");
 

@@ -2,13 +2,17 @@
     import { Toast, getToastStore, initializeStores } from '@skeletonlabs/skeleton';
     import { AppBar, AppShell, Avatar } from '@skeletonlabs/skeleton';
     import '../app.pcss';
-    import { onMount } from 'svelte';
-    import { userProfile$ } from '$lib/stores/userProfile';
     import { hubNotification$ } from '$lib/stores/hubNotification';
+    import type { LayoutData } from './$types';
+    import { userProfile$ } from '$lib/stores/userProfile';
+    import { goto } from '$app/navigation';
+    import { onMount } from 'svelte';
 
     initializeStores();
 
     const toastStore = getToastStore();
+
+    export let data: LayoutData;
 
     hubNotification$.subscribe((notification) => {
         if (!notification) {
@@ -32,11 +36,11 @@
         }
     });
 
-    onMount(async () => {
-        await userProfile$.fetch();
+    onMount(() => {
+        if (!data.user.isAuthenticated) {
+            goto('/login');
+        }
     });
-
-    //onDestroy(async () => hubConnection$.disconnect());
 </script>
 
 <Toast position="br" />
@@ -52,7 +56,8 @@
         <AppBar class="w-full text-primary-100" background="bg-secondary-900">
             <svelte:fragment slot="trail">
                 <div class="flex flex-row gap-2 items-end absolute right-0 mr-4">
-                    {#if $userProfile$?.userId}
+                    {#if $userProfile$}
+                        <div><a href="/logout">Logout</a></div>
                         <div>{$userProfile$.userName}</div>
                         <div>
                             <Avatar
@@ -62,6 +67,8 @@
                                 width="w-10"
                             />
                         </div>
+                    {:else}
+                        <div><a href="/login">Login</a></div>
                     {/if}
                 </div>
             </svelte:fragment>
@@ -74,6 +81,8 @@
 
     <!-- Footer -->
     <svelte:fragment slot="footer">
-        <div class="text-xl w-full items-center text-center">Footer Placeholder</div>
+        <div class="text-base w-full items-center text-center">
+            Copyright © {new Date().getUTCFullYear()} Let's Talk
+        </div>
     </svelte:fragment>
 </AppShell>

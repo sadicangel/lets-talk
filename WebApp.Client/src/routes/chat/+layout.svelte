@@ -1,42 +1,43 @@
 <script lang="ts">
     import ChannelList from '$lib/components/ChannelList.svelte';
-    import { channelList$ } from '$lib/stores/channelList';
-    import { hubConnection$ } from '$lib/stores/hubConnection';
+    import { hub } from '$lib/hub';
     import { hubConnectionStatus$ } from '$lib/stores/hubConnectionStatus';
-    import { messageList$ } from '$lib/stores/messageList';
-    import { encodeText } from '$lib/utf8';
     import { AppShell } from '@skeletonlabs/skeleton';
     import { onMount } from 'svelte';
+    import type { LayoutData } from './$types';
+    import { goto } from '$app/navigation';
+    export let data: LayoutData;
 
     onMount(async () => {
-        await hubConnection$.connect();
-        await channelList$.fetch();
+        if (!data.user.isAuthenticated) {
+            goto('/login');
+        }
+        await hub.connect();
+        // // TEST CODE:
+        // const firstChannel = Object.values($channelList$.channels)[0];
+        // messageList$.push({
+        //     senderId: 'cb33be51-2342-488d-8882-54028d40d91c',
+        //     senderAvatar:
+        //         'https://api.dicebear.com/7.x/fun-emoji/svg?seed=cb33be51-2342-488d-8882-54028d40d91c',
+        //     senderName: 'other@lt.com',
+        //     channelId: firstChannel.channelId,
+        //     channelName: 'admins',
+        //     channelIcon:
+        //         'https://api.dicebear.com/7.x/shapes/svg?seed=6e5312d6-57e0-4362-925d-a3881c1e5df7',
+        //     content: encodeText('Odio harum omnis quo labore laborum. Sequi?'),
+        //     contentType: 'text/plain',
+        //     eventId: '',
+        //     eventTimestamp: '',
+        //     eventType: 'MessageBroadcast',
+        //     timestamp: new Date().toISOString()
+        // });
 
-        // TEST CODE:
-        const firstChannel = Object.values($channelList$.channels)[0];
-        messageList$.push({
-            senderId: 'cb33be51-2342-488d-8882-54028d40d91c',
-            senderAvatar:
-                'https://api.dicebear.com/7.x/fun-emoji/svg?seed=cb33be51-2342-488d-8882-54028d40d91c',
-            senderName: 'other@lt.com',
-            channelId: firstChannel.channelId,
-            channelName: 'admins',
-            channelIcon:
-                'https://api.dicebear.com/7.x/shapes/svg?seed=6e5312d6-57e0-4362-925d-a3881c1e5df7',
-            content: encodeText('Odio harum omnis quo labore laborum. Sequi?'),
-            contentType: 'text/plain',
-            eventId: '',
-            eventTimestamp: '',
-            eventType: 'MessageBroadcast',
-            timestamp: new Date().toISOString()
-        });
-
-        await $hubConnection$.send(
-            'SendMessage',
-            firstChannel.channelId,
-            'text/plain',
-            encodeText('Lorem ipsum dolor sit amet consectetur adipisicing elit.')
-        );
+        // await $hubConnection$.send(
+        //     'SendMessage',
+        //     firstChannel.channelId,
+        //     'text/plain',
+        //     encodeText('Lorem ipsum dolor sit amet consectetur adipisicing elit.')
+        // );
     });
 
     async function triggerServerNotification() {
@@ -73,13 +74,13 @@
                     <span>status: ✅</span>
                     <button
                         class="flex-1 button-base-styles variant-filled rounded-lg"
-                        on:click={hubConnection$.disconnect}>Disconnect from chat</button
+                        on:click={hub.disconnect}>Disconnect from chat</button
                     >
                 {:else}
                     <span>status: ❌</span>
                     <button
                         class="basis-2/3 button-base-styles variant-filled rounded-lg"
-                        on:click={hubConnection$.connect}>Connect to chat</button
+                        on:click={hub.connect}>Connect to chat</button
                     >
                 {/if}
             </div>
