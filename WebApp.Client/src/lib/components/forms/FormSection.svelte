@@ -15,7 +15,7 @@
                         {title}
                     </h1>
                 {/if}
-                <form class="space-y-4 md:space-y-6 group">
+                <form class="space-y-4 md:space-y-6 group" on:submit|preventDefault>
                     <slot />
                 </form>
             </div>

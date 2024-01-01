@@ -5,4 +5,4 @@
     export let data: PageData;
 </script>
 
-<Channel channelId={data.channelId} />
+<Channel channelId={data.params.channelId} />

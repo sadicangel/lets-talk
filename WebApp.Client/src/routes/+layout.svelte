@@ -2,13 +2,17 @@
     import { Toast, getToastStore, initializeStores } from '@skeletonlabs/skeleton';
     import { AppBar, AppShell, Avatar } from '@skeletonlabs/skeleton';
     import '../app.pcss';
-    import { onMount } from 'svelte';
-    import { userProfile$ } from '$lib/stores/userProfile';
     import { hubNotification$ } from '$lib/stores/hubNotification';
+    import type { LayoutData } from './$types';
+    import { userProfile$ } from '$lib/stores/userProfile';
+    import { goto } from '$app/navigation';
+    import { onMount } from 'svelte';
 
     initializeStores();
 
     const toastStore = getToastStore();
+
+    export let data: LayoutData;
 
     hubNotification$.subscribe((notification) => {
         if (!notification) {
@@ -32,8 +36,10 @@
         }
     });
 
-    onMount(async () => {
-        await userProfile$.fetch();
+    onMount(() => {
+        if (!data.user.isAuthenticated) {
+            goto('/login');
+        }
     });
 </script>
 
@@ -75,6 +81,8 @@
 
     <!-- Footer -->
     <svelte:fragment slot="footer">
-        <div class="text-xl w-full items-center text-center">Footer Placeholder</div>
+        <div class="text-base w-full items-center text-center">
+            Copyright © {new Date().getUTCFullYear()} Let's Talk
+        </div>
     </svelte:fragment>
 </AppShell>
