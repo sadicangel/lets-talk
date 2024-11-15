@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignalR Chat Room</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+  <style>
+    #chat {
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: scroll;
+    }
+
+    #inputForm {
+      display: flex;
+      margin-top: 10px;
+    }
+
+      #inputForm input, #inputForm button {
+        margin-right: 5px;
+      }
+
+    .notification {
+      color: blue;
+    }
+  </style>
+</head>
+<body>
+  <h1>SignalR Chat Room</h1>
+  <div id="chat"></div>
+  <form id="inputForm">
+    <input type="text" id="messageInput" placeholder="Message" required />
+    <button type="submit">Send</button>
+  </form>
+  <script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/lets-talk")
+        .build();
+
+    connection.on("OnMessageEvent", (event) => {
+        const msg = document.createElement("div");
+        msg.textContent = `${event.senderId}: ${event.content}`;
+        document.getElementById("chat").appendChild(msg);
+    });
+
+    connection.on("OnNotificationEvent", (event) => {
+        const notification = document.createElement("div");
+        notification.textContent = `Notification: ${event.content}`;
+        notification.classList.add("notification");
+        document.getElementById("chat").appendChild(notification);
+    });
+
+    connection.start().catch(err => console.error(err.toString()));
+
+    document.getElementById("inputForm").addEventListener("submit", event => {
+        event.preventDefault();
+        const channelId = '3BC6C9A5-6B8D-4679-91D7-D79796613017';
+        const message = document.getElementById("messageInput").value;
+        connection.invoke("SendMessage", channelId, 'text/plain', message).catch(err => console.error(err.toString()));
+        document.getElementById("messageInput").value = '';
+    });
+  </script>
+</body>
+</html>

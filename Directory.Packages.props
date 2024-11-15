@@ -4,5 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="1.2.37" />
   </ItemGroup>
 </Project>
