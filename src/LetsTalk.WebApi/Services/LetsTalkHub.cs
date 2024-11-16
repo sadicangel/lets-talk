@@ -1,31 +1,72 @@
-﻿using System.Security.Claims;
-using LetsTalk.Domain.Events;
+﻿using System.Net.Mime;
+using System.Text;
 using LetsTalk.Domain.Services;
+using LetsTalk.WebApi.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace LetsTalk.WebApi.Services;
 
 [Authorize]
-internal sealed class LetsTalkHub : Hub<ILetsTalkClient>
+internal sealed class LetsTalkHub(
+    ConnectionManager connectionManager,
+    LetsTalkDbContext dbContext,
+    ILogger<LetsTalkHub> logger)
+    : Hub<ILetsTalkClient>
 {
     public override async Task OnConnectedAsync()
     {
-        await Clients.Others.OnNotificationEvent(new NotificationEvent("A new user has joined the chat room."));
+        var user = connectionManager.AddConnection(Context.ConnectionId, Context.GetUserId());
+        var notification = new Notification
+        {
+            Id = Guid.CreateVersion7(),
+            Timestamp = DateTimeOffset.UtcNow,
+            ContentType = MediaTypeNames.Text.Plain,
+            Content = Encoding.UTF8.GetBytes($"{user.UserName} has joined the chat."),
+        };
+
+        await Clients.All.OnNotificationEvent(notification);
+        dbContext.Notifications.Add(notification);
+        await dbContext.SaveChangesAsync();
+        logger.LogInformation("{Username} has joined the chat.", user.UserName);
 
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        await Clients.Others.OnNotificationEvent(new NotificationEvent("A user has left the chat room."));
+        var user = connectionManager.RemoveConnection(Context.ConnectionId);
+        var notification = new Notification
+        {
+            Id = Guid.CreateVersion7(),
+            Timestamp = DateTimeOffset.UtcNow,
+            ContentType = MediaTypeNames.Text.Plain,
+            Content = Encoding.UTF8.GetBytes($"{user.UserName} has left the chat."),
+        };
+
+        await Clients.All.OnNotificationEvent(notification);
+        dbContext.Notifications.Add(notification);
+        await dbContext.SaveChangesAsync();
+        logger.LogInformation("{Username} has left the chat.", user.UserName);
 
         await base.OnDisconnectedAsync(exception);
     }
 
     public async Task SendMessage(Guid channelId, string contentType, byte[] content)
     {
-        var senderId = Guid.Parse(Context.GetHttpContext()!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        await Clients.All.OnMessageEvent(new MessageEvent(channelId, senderId, contentType, content));
+        var message = new Message
+        {
+            Id = Guid.CreateVersion7(),
+            Timestamp = DateTimeOffset.UtcNow,
+            ChannelId = channelId,
+            SenderId = Context.GetUserId(),
+            ContentType = contentType,
+            Content = content,
+        };
+
+        await Clients.All.OnMessageEvent(message);
+        dbContext.Messages.Add(message);
+        await dbContext.SaveChangesAsync();
+        logger.LogInformation("{Username} has sent a message.", message.Sender.UserName);
     }
 }

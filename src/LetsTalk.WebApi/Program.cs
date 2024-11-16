@@ -10,7 +10,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie();
 
 builder.Services.AddOpenApi();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(opts => opts.EnableDetailedErrors = true);
+builder.Services.AddSingleton<ConnectionManager>();
 
 var app = builder.Build();
 

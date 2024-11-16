@@ -9,10 +9,20 @@
     #chat {
       display: flex;
       flex-direction: column;
-      height: 80vh;
+      height: 60vh;
       border: 1px solid #ccc;
       padding: 10px;
       overflow-y: scroll;
+    }
+
+    #users {
+      display: flex;
+      flex-direction: column;
+      height: 20vh;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: scroll;
+      margin-top: 10px;
     }
 
     #inputForm {
@@ -32,26 +42,39 @@
 <body>
   <h1>SignalR Chat Room</h1>
   <div id="chat"></div>
+  <div id="users"></div>
   <form id="inputForm">
     <input type="text" id="messageInput" placeholder="Message" required />
     <button type="submit">Send</button>
   </form>
   <script>
+    const encoder = new TextEncoder();
+
     const connection = new signalR.HubConnectionBuilder()
         .withUrl("/lets-talk")
         .build();
 
     connection.on("OnMessageEvent", (event) => {
         const msg = document.createElement("div");
-        msg.textContent = `${event.senderId}: ${event.content}`;
+        msg.textContent = `${event.senderId}: ${atob(event.content)}`;
         document.getElementById("chat").appendChild(msg);
     });
 
     connection.on("OnNotificationEvent", (event) => {
         const notification = document.createElement("div");
-        notification.textContent = `Notification: ${event.content}`;
+        notification.textContent = atob(event.content);
         notification.classList.add("notification");
         document.getElementById("chat").appendChild(notification);
+    });
+
+    connection.on("UpdateUserList", (users) => {
+        const usersDiv = document.getElementById("users");
+        usersDiv.innerHTML = ''; // Clear the current list
+        users.forEach(user => {
+            const userDiv = document.createElement("div");
+            userDiv.textContent = user;
+            usersDiv.appendChild(userDiv);
+        });
     });
 
     connection.start().catch(err => console.error(err.toString()));
@@ -59,8 +82,11 @@
     document.getElementById("inputForm").addEventListener("submit", event => {
         event.preventDefault();
         const channelId = '3BC6C9A5-6B8D-4679-91D7-D79796613017';
-        const message = document.getElementById("messageInput").value;
-        connection.invoke("SendMessage", channelId, 'text/plain', message).catch(err => console.error(err.toString()));
+        const content = document.getElementById("messageInput").value;
+        const utf8Array = encoder.encode(content);
+        const base64String = btoa(String.fromCharCode(...utf8Array));
+
+        connection.invoke("SendMessage", channelId, 'text/plain', base64String).catch(err => console.error(err.toString()));
         document.getElementById("messageInput").value = '';
     });
   </script>

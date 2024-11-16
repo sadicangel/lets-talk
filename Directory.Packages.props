@@ -4,6 +4,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageVersion Include="RustyOptions" Version="0.10.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="1.2.37" />
   </ItemGroup>
 </Project>
