@@ -59,7 +59,7 @@ internal sealed class LetsTalkHub(
             Id = Guid.CreateVersion7(),
             Timestamp = DateTimeOffset.UtcNow,
             ChannelId = channelId,
-            SenderId = Context.GetUserId(),
+            AuthorId = Context.GetUserId(),
             ContentType = contentType,
             Content = content,
         };
@@ -67,6 +67,6 @@ internal sealed class LetsTalkHub(
         await Clients.All.OnMessageEvent(message);
         dbContext.Messages.Add(message);
         await dbContext.SaveChangesAsync();
-        logger.LogInformation("{Username} has sent a message.", message.Sender.UserName);
+        logger.LogInformation("{UserId} has sent a message.", message.AuthorId);
     }
 }

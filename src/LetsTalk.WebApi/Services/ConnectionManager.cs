@@ -1,10 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using LetsTalk.WebApi.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace LetsTalk.WebApi.Services;
 
-internal sealed class ConnectionManager(IDbContextFactory<LetsTalkDbContext> dbContextFactory)
+internal sealed class ConnectionManager(IServiceScopeFactory serviceScopeFactory)
 {
     private readonly ConcurrentDictionary<string, User> _connectedUsers = [];
 
@@ -14,7 +13,8 @@ internal sealed class ConnectionManager(IDbContextFactory<LetsTalkDbContext> dbC
     {
         return _connectedUsers.GetOrAdd(connectionId, _ =>
         {
-            using var dbContext = dbContextFactory.CreateDbContext();
+            using var serviceScope = serviceScopeFactory.CreateScope();
+            var dbContext = serviceScope.ServiceProvider.GetRequiredService<LetsTalkDbContext>();
             return dbContext.Users.Single(user => user.Id == userId);
         });
     }

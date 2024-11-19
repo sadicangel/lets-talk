@@ -10,4 +10,24 @@ public class LetsTalkDbContext(DbContextOptions<LetsTalkDbContext> options)
     public virtual required DbSet<Channel> Channels { get; init; }
     public virtual required DbSet<Message> Messages { get; init; }
     public virtual required DbSet<Notification> Notifications { get; init; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Channels)
+            .WithMany(c => c.Members)
+            .UsingEntity<ChannelMember>();
+
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Messages)
+            .WithOne(m => m.Author);
+
+        modelBuilder.Entity<Channel>()
+            .HasOne(c => c.Admin)
+            .WithMany();
+
+        modelBuilder.Entity<Channel>()
+            .HasMany(c => c.Messages)
+            .WithOne(m => m.Channel);
+    }
 }

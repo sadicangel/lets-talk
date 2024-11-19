@@ -4,7 +4,7 @@ public sealed record class MessageEvent(
     Guid EventId,
     DateTimeOffset Timestamp,
     Guid ChannelId,
-    Guid SenderId,
+    Guid AuthorId,
     string ContentType,
     byte[] Content)
     : IEvent;

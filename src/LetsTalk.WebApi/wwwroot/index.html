@@ -55,8 +55,9 @@
         .build();
 
     connection.on("OnMessageEvent", (event) => {
+        console.log(event);
         const msg = document.createElement("div");
-        msg.textContent = `${event.senderId}: ${atob(event.content)}`;
+        msg.textContent = `${event.authorId}: ${atob(event.content)}`;
         document.getElementById("chat").appendChild(msg);
     });
 
@@ -81,7 +82,7 @@
 
     document.getElementById("inputForm").addEventListener("submit", event => {
         event.preventDefault();
-        const channelId = '3BC6C9A5-6B8D-4679-91D7-D79796613017';
+        const channelId = '019341b2-ff36-7798-ad0b-cb7ecc9fb128';
         const content = document.getElementById("messageInput").value;
         const utf8Array = encoder.encode(content);
         const base64String = btoa(String.fromCharCode(...utf8Array));
