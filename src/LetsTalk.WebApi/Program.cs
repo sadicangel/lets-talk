@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Security.Claims;
 using Bogus;
+using LetsTalk.WebApi;
 using LetsTalk.WebApi.Entities;
 using LetsTalk.WebApi.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -70,15 +71,9 @@ app.Use(static async (context, next) =>
         Random.Shared.Shuffle(CollectionsMarshal.AsSpan(users));
         var user = users[0];
 
-        var claimsIdentity = new ClaimsIdentity(
-            [
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Name, user.UserName),
-                new(ClaimTypes.Email, user.Email),
-            ],
-            CookieAuthenticationDefaults.AuthenticationScheme);
-
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+        await context.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(user.GetIdentity(CookieAuthenticationDefaults.AuthenticationScheme)));
     }
     await next.Invoke();
 });

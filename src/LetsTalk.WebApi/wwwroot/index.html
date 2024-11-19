@@ -57,7 +57,7 @@
     connection.on("OnMessage", (event) => {
         console.log(event);
         const msg = document.createElement("div");
-        msg.textContent = `${event.authorId}: ${atob(event.content)}`;
+        msg.textContent = `${event.authorUserName}: ${atob(event.content)}`;
         document.getElementById("chat").appendChild(msg);
     });
 

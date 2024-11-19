@@ -5,6 +5,8 @@ public sealed record class MessageEvent(
     DateTimeOffset Timestamp,
     Guid ChannelId,
     Guid AuthorId,
+    string AuthorUserName,
+    string? AuthorAvatarUrl,
     string ContentType,
     byte[] Content)
     : IEvent;

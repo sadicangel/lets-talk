@@ -24,7 +24,7 @@ internal sealed class LetsTalkHub(
             user.UserName,
             user.AvatarUrl));
 
-        logger.LogInformation("{UserName} has joined the chat.", user.UserName);
+        logger.LogInformation("{UserName}@{UserId} has joined the chat.", user.UserName, user.Id);
 
         await base.OnConnectedAsync();
     }
@@ -40,7 +40,7 @@ internal sealed class LetsTalkHub(
             user.UserName,
             user.AvatarUrl));
 
-        logger.LogInformation("{Username} has left the chat.", user.UserName);
+        logger.LogInformation("{Username}@{UserId} has left the chat.", user.UserName, user.Id);
 
         await base.OnDisconnectedAsync(exception);
     }
@@ -57,9 +57,20 @@ internal sealed class LetsTalkHub(
             Content = content,
         };
 
-        await Clients.All.OnMessage(message);
         dbContext.Messages.Add(message);
         await dbContext.SaveChangesAsync();
-        logger.LogInformation("{UserId} has sent a message.", message.AuthorId);
+
+        await Clients.All.OnMessage(new MessageEvent
+        (
+            message.Id,
+            message.Timestamp,
+            message.ChannelId,
+            Context.GetUserId(),
+            Context.GetUserName(),
+            Context.GetUserAvatarUri(),
+            message.ContentType,
+            message.Content
+        ));
+        logger.LogInformation("{UserName}@{UserId} has sent a message.", Context.GetUserName(), Context.GetUserId());
     }
 }

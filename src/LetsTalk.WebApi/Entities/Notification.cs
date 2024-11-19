@@ -1,6 +1,4 @@
-﻿using LetsTalk.Domain.Events;
-
-namespace LetsTalk.WebApi.Entities;
+﻿namespace LetsTalk.WebApi.Entities;
 
 public sealed class Notification
 {
@@ -8,8 +6,4 @@ public sealed class Notification
     public required DateTimeOffset Timestamp { get; set; }
     public required string ContentType { get; set; }
     public required byte[] Content { get; set; }
-
-    public NotificationEvent ToEvent() => new(Id, Timestamp, ContentType, Content);
-
-    public static implicit operator NotificationEvent(Notification notification) => notification.ToEvent();
 }
