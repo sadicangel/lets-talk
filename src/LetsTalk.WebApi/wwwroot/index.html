@@ -30,9 +30,9 @@
       margin-top: 10px;
     }
 
-      #inputForm input, #inputForm button {
-        margin-right: 5px;
-      }
+    #inputForm input, #inputForm button {
+      margin-right: 5px;
+    }
 
     .notification {
       color: blue;
@@ -54,16 +54,30 @@
         .withUrl("/lets-talk")
         .build();
 
-    connection.on("OnMessageEvent", (event) => {
+    connection.on("OnMessage", (event) => {
         console.log(event);
         const msg = document.createElement("div");
         msg.textContent = `${event.authorId}: ${atob(event.content)}`;
         document.getElementById("chat").appendChild(msg);
     });
 
-    connection.on("OnNotificationEvent", (event) => {
+    connection.on("OnNotification", (event) => {
         const notification = document.createElement("div");
         notification.textContent = atob(event.content);
+        notification.classList.add("notification");
+        document.getElementById("chat").appendChild(notification);
+    });
+
+    connection.on("OnUserConnected", (event) => {
+        const notification = document.createElement("div");
+        notification.textContent = `${event.userName} has joined the chat.`;
+        notification.classList.add("notification");
+        document.getElementById("chat").appendChild(notification);
+    });
+
+    connection.on("OnUserDisconnected", (event) => {
+        const notification = document.createElement("div");
+        notification.textContent = `${event.userName} has left the chat.`;
         notification.classList.add("notification");
         document.getElementById("chat").appendChild(notification);
     });

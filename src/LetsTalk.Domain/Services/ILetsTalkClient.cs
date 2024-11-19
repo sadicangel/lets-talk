@@ -4,6 +4,9 @@ namespace LetsTalk.Domain.Services;
 
 public interface ILetsTalkClient
 {
-    Task OnMessageEvent(MessageEvent @event);
-    Task OnNotificationEvent(NotificationEvent @event);
+    Task OnMessage(MessageEvent @event);
+    Task OnNotification(NotificationEvent @event);
+
+    Task OnUserConnected(UserConnectedEvent @event);
+    Task OnUserDisconnected(UserDisconnectedEvent @event);
 }

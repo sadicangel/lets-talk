@@ -1,5 +1,4 @@
-﻿using System.Net.Mime;
-using System.Text;
+﻿using LetsTalk.Domain.Events;
 using LetsTalk.Domain.Services;
 using LetsTalk.WebApi.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -17,18 +16,15 @@ internal sealed class LetsTalkHub(
     public override async Task OnConnectedAsync()
     {
         var user = connectionManager.AddConnection(Context.ConnectionId, Context.GetUserId());
-        var notification = new Notification
-        {
-            Id = Guid.CreateVersion7(),
-            Timestamp = DateTimeOffset.UtcNow,
-            ContentType = MediaTypeNames.Text.Plain,
-            Content = Encoding.UTF8.GetBytes($"{user.UserName} has joined the chat."),
-        };
 
-        await Clients.All.OnNotificationEvent(notification);
-        dbContext.Notifications.Add(notification);
-        await dbContext.SaveChangesAsync();
-        logger.LogInformation("{Username} has joined the chat.", user.UserName);
+        await Clients.All.OnUserConnected(new UserConnectedEvent(
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow,
+            user.Id,
+            user.UserName,
+            user.AvatarUrl));
+
+        logger.LogInformation("{UserName} has joined the chat.", user.UserName);
 
         await base.OnConnectedAsync();
     }
@@ -36,17 +32,14 @@ internal sealed class LetsTalkHub(
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var user = connectionManager.RemoveConnection(Context.ConnectionId);
-        var notification = new Notification
-        {
-            Id = Guid.CreateVersion7(),
-            Timestamp = DateTimeOffset.UtcNow,
-            ContentType = MediaTypeNames.Text.Plain,
-            Content = Encoding.UTF8.GetBytes($"{user.UserName} has left the chat."),
-        };
 
-        await Clients.All.OnNotificationEvent(notification);
-        dbContext.Notifications.Add(notification);
-        await dbContext.SaveChangesAsync();
+        await Clients.All.OnUserDisconnected(new UserDisconnectedEvent(
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow,
+            user.Id,
+            user.UserName,
+            user.AvatarUrl));
+
         logger.LogInformation("{Username} has left the chat.", user.UserName);
 
         await base.OnDisconnectedAsync(exception);
@@ -64,7 +57,7 @@ internal sealed class LetsTalkHub(
             Content = content,
         };
 
-        await Clients.All.OnMessageEvent(message);
+        await Clients.All.OnMessage(message);
         dbContext.Messages.Add(message);
         await dbContext.SaveChangesAsync();
         logger.LogInformation("{UserId} has sent a message.", message.AuthorId);
