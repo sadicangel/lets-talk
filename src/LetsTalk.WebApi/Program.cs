@@ -52,7 +52,7 @@ if (app.Environment.IsDevelopment())
         DisplayName = "General",
         IconUrl = default,
         AdminId = dbContext.Users.Local.First().Id,
-        //Members = [.. dbContext.Users.Local],
+        Members = [.. dbContext.Users.Local],
     });
     dbContext.SaveChanges();
 }

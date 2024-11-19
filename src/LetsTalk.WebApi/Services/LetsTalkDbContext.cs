@@ -16,7 +16,9 @@ public class LetsTalkDbContext(DbContextOptions<LetsTalkDbContext> options)
         modelBuilder.Entity<User>()
             .HasMany(u => u.Channels)
             .WithMany(c => c.Members)
-            .UsingEntity<ChannelMember>();
+            .UsingEntity<ChannelMember>(builder => builder
+                .Property(cm => cm.JoinedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP"));
 
         modelBuilder.Entity<User>()
             .HasMany(u => u.Messages)
