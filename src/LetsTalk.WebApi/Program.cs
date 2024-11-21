@@ -23,6 +23,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddOpenApi();
 builder.Services.AddSignalR(opts => opts.EnableDetailedErrors = true);
+builder.Services.AddSingleton<MessageBatchService>();
+builder.Services.AddHostedService<MessageBatchService>();
 builder.Services.AddSingleton<ConnectionManager>();
 
 var app = builder.Build();
@@ -38,7 +40,7 @@ if (app.Environment.IsDevelopment())
     var dbContext = serviceScope.ServiceProvider.GetRequiredService<LetsTalkDbContext>();
     dbContext.Database.EnsureCreated();
     dbContext.Users.AddRange(new Faker<User>()
-        .RuleFor(u => u.Id, f => Guid.CreateVersion7())
+        .RuleFor(u => u.Id, f => Guid.CreateVersion7().ToString())
         .RuleFor(u => u.UserName, f => f.Person.UserName)
         .RuleFor(u => u.Email, f => f.Person.Email)
         .RuleFor(u => u.PasswordHash, f => f.Internet.Password())
@@ -48,7 +50,7 @@ if (app.Environment.IsDevelopment())
         .Generate(10));
     dbContext.Channels.Add(new Channel
     {
-        Id = Guid.Parse("019341b2-ff36-7798-ad0b-cb7ecc9fb128"),
+        Id = "019341b2-ff36-7798-ad0b-cb7ecc9fb128",
         DisplayName = "General",
         IconUrl = default,
         AdminId = dbContext.Users.Local.First().Id,

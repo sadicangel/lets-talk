@@ -9,4 +9,7 @@ public interface ILetsTalkClient
 
     Task OnUserConnected(UserConnectedEvent @event);
     Task OnUserDisconnected(UserDisconnectedEvent @event);
+
+    Task OnChannelMemberJoined(ChannelMemberJoinedEvent @event);
+    Task OnChannelMemberLeft(ChannelMemberLeftEvent @event);
 }

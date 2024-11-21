@@ -6,32 +6,46 @@
   <title>SignalR Chat Room</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
   <style>
-    #chat {
+    body {
       display: flex;
       flex-direction: column;
-      height: 60vh;
-      border: 1px solid #ccc;
-      padding: 10px;
-      overflow-y: scroll;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
     }
 
-    #users {
-      display: flex;
-      flex-direction: column;
-      height: 20vh;
+    #chat {
+      flex: 1;
       border: 1px solid #ccc;
       padding: 10px;
       overflow-y: scroll;
-      margin-top: 10px;
     }
 
     #inputForm {
       display: flex;
-      margin-top: 10px;
+      padding: 10px;
+      border-top: 1px solid #ccc;
     }
 
-    #inputForm input, #inputForm button {
+    #inputForm input {
+      flex: 1;
+      padding: 10px;
       margin-right: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    #inputForm button {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    #inputForm button:hover {
+      background-color: #0056b3;
     }
 
     .notification {
@@ -42,7 +56,6 @@
 <body>
   <h1>SignalR Chat Room</h1>
   <div id="chat"></div>
-  <div id="users"></div>
   <form id="inputForm">
     <input type="text" id="messageInput" placeholder="Message" required />
     <button type="submit">Send</button>
@@ -57,7 +70,7 @@
     connection.on("OnMessage", (event) => {
         console.log(event);
         const msg = document.createElement("div");
-        msg.textContent = `${event.authorUserName}: ${atob(event.content)}`;
+        msg.textContent = `${event.author.userName}: ${atob(event.content)}`;
         document.getElementById("chat").appendChild(msg);
     });
 
@@ -70,26 +83,16 @@
 
     connection.on("OnUserConnected", (event) => {
         const notification = document.createElement("div");
-        notification.textContent = `${event.userName} has joined the chat.`;
+        notification.textContent = `${event.connectingUser.userName} has joined the chat.`;
         notification.classList.add("notification");
         document.getElementById("chat").appendChild(notification);
     });
 
     connection.on("OnUserDisconnected", (event) => {
         const notification = document.createElement("div");
-        notification.textContent = `${event.userName} has left the chat.`;
+        notification.textContent = `${event.disconnectingUser.userName} has left the chat.`;
         notification.classList.add("notification");
         document.getElementById("chat").appendChild(notification);
-    });
-
-    connection.on("UpdateUserList", (users) => {
-        const usersDiv = document.getElementById("users");
-        usersDiv.innerHTML = ''; // Clear the current list
-        users.forEach(user => {
-            const userDiv = document.createElement("div");
-            userDiv.textContent = user;
-            usersDiv.appendChild(userDiv);
-        });
     });
 
     connection.start().catch(err => console.error(err.toString()));

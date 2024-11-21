@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using LetsTalk.WebApi.Entities;
-using Microsoft.AspNetCore.SignalR;
 
 namespace LetsTalk.WebApi;
 public static class CustomClaimTypes
@@ -10,14 +9,14 @@ public static class CustomClaimTypes
 
 internal static class ClaimExtensions
 {
-    public static Guid GetUserId(this HubCallerContext context) =>
-        Guid.Parse(context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+    public static string GetUserId(this ClaimsPrincipal? claimsPrincipal) =>
+        claimsPrincipal?.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
 
-    public static string GetUserName(this HubCallerContext context) =>
-        context.User?.FindFirst(ClaimTypes.Name)?.Value!;
+    public static string GetUserName(this ClaimsPrincipal? claimsPrincipal) =>
+        claimsPrincipal?.FindFirst(ClaimTypes.Name)?.Value!;
 
-    public static string? GetUserAvatarUri(this HubCallerContext context) =>
-        context.User?.FindFirst(CustomClaimTypes.ImageUrl)?.Value;
+    public static string? GetUserAvatarUri(this ClaimsPrincipal? claimsPrincipal) =>
+        claimsPrincipal?.FindFirst(CustomClaimTypes.ImageUrl)?.Value;
 
     public static ClaimsIdentity GetIdentity(this User user, string authenticationScheme)
     {

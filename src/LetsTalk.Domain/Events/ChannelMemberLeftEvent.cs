@@ -1,10 +1,8 @@
 ﻿namespace LetsTalk.Domain.Events;
-
-public sealed record class MessageEvent(
+public sealed record class ChannelMemberLeftEvent(
     string EventId,
     DateTimeOffset Timestamp,
     ChannelDto Channel,
-    UserDto Author,
-    string ContentType,
-    byte[] Content)
+    UserDto LeavingMember,
+    IReadOnlyCollection<UserDto> Members)
     : IEvent;

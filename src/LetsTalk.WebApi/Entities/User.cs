@@ -2,7 +2,7 @@
 
 public sealed class User
 {
-    public required Guid Id { get; set; }
+    public required string Id { get; set; }
     public required string UserName { get; set; }
     public string? AvatarUrl { get; set; }
     public required string Email { get; set; }

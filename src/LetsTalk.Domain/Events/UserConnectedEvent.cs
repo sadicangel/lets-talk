@@ -1,8 +1,7 @@
 ﻿namespace LetsTalk.Domain.Events;
 
 public sealed record class UserConnectedEvent(
-    Guid EventId,
+    string EventId,
     DateTimeOffset Timestamp,
-    Guid UserId,
-    string UserName,
-    string? UserAvatarUrl);
+    UserDto ConnectingUser,
+    IReadOnlyCollection<UserDto> Users);

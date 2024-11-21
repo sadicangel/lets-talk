@@ -1,7 +1,7 @@
 ﻿namespace LetsTalk.Domain.Events;
 
 public sealed record class NotificationEvent(
-    Guid EventId,
+    string EventId,
     DateTimeOffset Timestamp,
     string ContentType,
     byte[] Content)

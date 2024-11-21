@@ -1,10 +1,8 @@
 ﻿namespace LetsTalk.Domain.Events;
-
-public sealed record class MessageEvent(
+public sealed record class ChannelMemberJoinedEvent(
     string EventId,
     DateTimeOffset Timestamp,
     ChannelDto Channel,
-    UserDto Author,
-    string ContentType,
-    byte[] Content)
+    UserDto JoiningMember,
+    IReadOnlyCollection<UserDto> Members)
     : IEvent;

@@ -8,6 +8,7 @@ public class LetsTalkDbContext(DbContextOptions<LetsTalkDbContext> options)
 {
     public virtual required DbSet<User> Users { get; init; }
     public virtual required DbSet<Channel> Channels { get; init; }
+    public virtual required DbSet<ChannelMember> ChannelMembers { get; init; }
     public virtual required DbSet<Message> Messages { get; init; }
     public virtual required DbSet<Notification> Notifications { get; init; }
 
