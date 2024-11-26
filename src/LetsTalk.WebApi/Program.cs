@@ -17,6 +17,7 @@ builder.AddNpgsqlDbContext<LetsTalkDbContext>("letstalk-database",
         .EnableDetailedErrors()
         .EnableSensitiveDataLogging());
 builder.EnrichNpgsqlDbContext<LetsTalkDbContext>();
+builder.Services.AddPooledDbContextFactory<LetsTalkDbContext>(opts => { });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie();

@@ -17,11 +17,9 @@ internal sealed class ConnectionManager
     private readonly Dictionary<string, UserDto> _usersByConnection;
     private readonly Dictionary<UserDto, HashSet<string>> _connectionsByUser;
 
-    public ConnectionManager(IServiceScopeFactory serviceScopeFactory)
+    public ConnectionManager(IDbContextFactory<LetsTalkDbContext> dbContextFactory)
     {
-        using var serviceScope = serviceScopeFactory.CreateScope();
-        var dbContext = serviceScope.ServiceProvider.GetRequiredService<LetsTalkDbContext>();
-
+        using var dbContext = dbContextFactory.CreateDbContext();
         var users = dbContext.Users.Include(u => u.Channels).ToDictionary(u => u.Id);
         var channels = dbContext.Channels.Include(c => c.Members).ToDictionary(c => c.Id);
 
