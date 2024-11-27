@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { HubClient } from '$lib/HubClient';
+	import { onMount } from 'svelte';
 
 	let isConnected = $state(false);
+
+	let username = $state('');
 
 	const hub = new HubClient();
 	hub
@@ -34,42 +37,22 @@
 		.on('OnChannelMemberLeft', (event) => {
 			console.log(event);
 		});
+
+	onMount(() => {
+		fetch('/api/auth/users')
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error(response.statusText);
+				}
+				return response.json();
+			})
+			.then((users: string[]) => {
+				username = users[0];
+			});
+	});
 </script>
 
-<h1>Chat</h1>
-
-<button
-	onclick={async () => {
-		const usersResponse = await fetch('/api/auth/users');
-		if (!usersResponse.ok) {
-			console.error(usersResponse.statusText);
-			return;
-		}
-
-		const users: string[] = await usersResponse.json();
-		const loginResponse = await fetch('/api/auth/login', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
-			},
-			body: new URLSearchParams({
-				username: users[0],
-				password: 'password'
-			})
-		});
-		if (!loginResponse.ok) {
-			console.error(loginResponse.statusText);
-			return;
-		}
-	}}>Login</button
->
-
-<button
-	onclick={async () => {
-		await hub.start();
-		isConnected = true;
-	}}>Click</button
->
+<h1>Chat - {username}</h1>
 
 {#if isConnected}
 	<h1>Let's Talks Chat Room - Connected</h1>
@@ -94,4 +77,31 @@
 	</form>
 {:else}
 	<h1 class="text-red-500">Let's Talks Chat Room - Not connected</h1>
+	<button
+		disabled={!username}
+		onclick={async () => {
+			await fetch('/api/auth/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				body: new URLSearchParams({
+					username: username,
+					password: 'password'
+				})
+			})
+				.then((loginResponse) => {
+					if (!loginResponse.ok) {
+						throw new Error(loginResponse.statusText);
+					}
+					return hub.start();
+				})
+				.then(() => {
+					isConnected = true;
+				})
+				.catch((err) => {
+					console.error(err.toString());
+				});
+		}}>Login</button
+	>
 {/if}
