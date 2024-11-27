@@ -1,12 +1,11 @@
 ﻿using LetsTalk.Domain.Events;
 using LetsTalk.Domain.Services;
 using LetsTalk.WebApi.Entities;
-using Microsoft.AspNetCore.Authorization;
+using LetsTalk.WebApi.Services;
 using Microsoft.AspNetCore.SignalR;
 
-namespace LetsTalk.WebApi.Services;
+namespace LetsTalk.WebApi.Endpoints;
 
-[Authorize]
 internal sealed class LetsTalkHub(
     ConnectionManager connectionManager,
     MessageBatchService messageBatchService,
@@ -28,8 +27,6 @@ internal sealed class LetsTalkHub(
             var connectedUsers = connectionManager.GetConnectedUsers();
 
             await Clients.All.OnUserConnected(new UserConnectedEvent(
-                EventId: Guid.NewGuid().ToString(),
-                Timestamp: DateTimeOffset.UtcNow,
                 ConnectingUser: user,
                 Users: connectedUsers));
 
@@ -40,8 +37,6 @@ internal sealed class LetsTalkHub(
                 var group = Clients.GroupExcept(channel.Id, userConnections);
 
                 await group.OnChannelMemberJoined(new ChannelMemberJoinedEvent(
-                    EventId: Guid.NewGuid().ToString(),
-                    Timestamp: DateTimeOffset.UtcNow,
                     Channel: channel,
                     JoiningMember: user,
                     Members: connectionManager.GetChannelMembers(channel)));
@@ -69,16 +64,12 @@ internal sealed class LetsTalkHub(
                 var group = Clients.GroupExcept(channel.Id, userConnections);
 
                 await group.OnChannelMemberLeft(new ChannelMemberLeftEvent(
-                    EventId: Guid.NewGuid().ToString(),
-                    Timestamp: DateTimeOffset.UtcNow,
                     Channel: channel,
                     LeavingMember: user,
                     Members: connectionManager.GetChannelMembers(channel)));
             }
 
             await Clients.All.OnUserDisconnected(new UserDisconnectedEvent(
-                EventId: Guid.NewGuid().ToString(),
-                Timestamp: DateTimeOffset.UtcNow,
                 DisconnectingUser: user,
                 Users: connectionManager.GetConnectedUsers()));
 
@@ -107,8 +98,6 @@ internal sealed class LetsTalkHub(
 
         await Clients.Group(channelId).OnMessage(new MessageEvent
         (
-            message.Id,
-            message.Timestamp,
             channel,
             user,
             message.ContentType,
