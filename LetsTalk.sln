@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LetsTalk.AppHost", "src\Let
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LetsTalk.ServiceDefaults", "src\LetsTalk.ServiceDefaults\LetsTalk.ServiceDefaults.csproj", "{B8013DE8-4980-09CA-F271-1E858B8C278D}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "LetsTalk.WebApp", "src\LetsTalk.WebApp\LetsTalk.WebApp.esproj", "{58DB88D9-6EDB-B22A-1C1B-C4C4212072A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,12 @@ Global
 		{B8013DE8-4980-09CA-F271-1E858B8C278D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8013DE8-4980-09CA-F271-1E858B8C278D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8013DE8-4980-09CA-F271-1E858B8C278D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58DB88D9-6EDB-B22A-1C1B-C4C4212072A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58DB88D9-6EDB-B22A-1C1B-C4C4212072A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58DB88D9-6EDB-B22A-1C1B-C4C4212072A2}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{58DB88D9-6EDB-B22A-1C1B-C4C4212072A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58DB88D9-6EDB-B22A-1C1B-C4C4212072A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58DB88D9-6EDB-B22A-1C1B-C4C4212072A2}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

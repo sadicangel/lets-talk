@@ -14,23 +14,33 @@ public class LetsTalkDbContext(DbContextOptions<LetsTalkDbContext> options)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>()
+        modelBuilder.Entity<User>(static user =>
+        {
+            user
+            .HasIndex(u => u.UserName)
+            .IsUnique();
+
+            user
             .HasMany(u => u.Channels)
             .WithMany(c => c.Members)
             .UsingEntity<ChannelMember>(builder => builder
                 .Property(cm => cm.JoinedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP"));
 
-        modelBuilder.Entity<User>()
+            user
             .HasMany(u => u.Messages)
             .WithOne(m => m.Author);
+        });
 
-        modelBuilder.Entity<Channel>()
+        modelBuilder.Entity<Channel>(static channel =>
+        {
+            channel
             .HasOne(c => c.Admin)
             .WithMany();
 
-        modelBuilder.Entity<Channel>()
+            channel
             .HasMany(c => c.Messages)
             .WithOne(m => m.Channel);
+        });
     }
 }
