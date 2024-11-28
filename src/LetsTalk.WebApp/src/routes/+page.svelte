@@ -1,6 +1,9 @@
 <script lang="ts">
+	import ChatMessage from '$lib/components/ChatMessage.svelte';
+	import { decodeContent, encodeContent } from '$lib/encoding';
+	import type { MessageEvent } from '$lib/events';
 	import { HubClient } from '$lib/HubClient';
-	import { onMount } from 'svelte';
+	import { mount, onMount } from 'svelte';
 
 	let isConnected = $state(false);
 
@@ -9,26 +12,27 @@
 	const hub = new HubClient();
 	hub
 		.on('OnMessage', (event) => {
-			const msg = document.createElement('div');
-			msg.textContent = `${event.author.userName}: ${atob(event.content)}`;
-			document.getElementById('chat')!.appendChild(msg);
+			mount(ChatMessage, {
+				target: document.getElementById('chat')!,
+				props: { message: event, alignment: 'start' }
+			});
 		})
 		.on('OnNotification', (event) => {
 			const notification = document.createElement('div');
-			notification.textContent = atob(event.content);
+			notification.textContent = decodeContent(event.contentType, event.content);
 			notification.classList.add('text-blue-600');
 			document.getElementById('chat')!.appendChild(notification);
 		})
 		.on('OnUserConnected', (event) => {
 			const notification = document.createElement('div');
 			notification.textContent = `${event.connectingUser.userName} has joined the chat.`;
-			notification.classList.add('notification');
+			notification.classList.add('text-blue-600');
 			document.getElementById('chat')!.appendChild(notification);
 		})
 		.on('OnUserDisconnected', (event) => {
 			const notification = document.createElement('div');
 			notification.textContent = `${event.disconnectingUser.userName} has left the chat.`;
-			notification.classList.add('notification');
+			notification.classList.add('text-blue-600');
 			document.getElementById('chat')!.appendChild(notification);
 		})
 		.on('OnChannelMemberJoined', (event) => {
@@ -50,6 +54,24 @@
 				username = users[0];
 			});
 	});
+
+	// dummy message event
+	const message: MessageEvent = {
+		eventId: '',
+		eventName: 'MessageEvent',
+		timestamp: new Date().toISOString(),
+		channel: {
+			id: '019341b2-ff36-7798-ad0b-cb7ecc9fb128',
+			displayName: 'General',
+			adminId: ''
+		},
+		author: {
+			id: '',
+			userName: 'Obi-Wan_Kenobi'
+		},
+		contentType: 'text/plain',
+		content: encodeContent('text/plain', 'You were the Chosen One!')
+	};
 </script>
 
 <h1>Chat - {username}</h1>
@@ -63,11 +85,9 @@
 			event.preventDefault();
 			const messageInput = document.getElementById('messageInput')! as HTMLInputElement;
 			const channelId = '019341b2-ff36-7798-ad0b-cb7ecc9fb128';
-			const content = messageInput.value;
-			const utf8Array = new TextEncoder().encode(content);
-			const base64String = btoa(String.fromCharCode(...utf8Array));
+			const content = encodeContent('text/plain', messageInput.value);
 			hub
-				.invoke('SendMessage', channelId, 'text/plain', base64String)
+				.invoke('SendMessage', channelId, 'text/plain', content)
 				.catch((err) => console.error(err.toString()));
 			messageInput.value = '';
 		}}
