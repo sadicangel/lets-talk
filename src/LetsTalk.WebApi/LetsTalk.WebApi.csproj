@@ -12,4 +12,8 @@
     <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LetsTalk.ServiceDefaults\LetsTalk.ServiceDefaults.csproj" />
+  </ItemGroup>
+
 </Project>
