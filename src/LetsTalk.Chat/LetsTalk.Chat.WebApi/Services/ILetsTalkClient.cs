@@ -1,4 +1,4 @@
-﻿namespace LetsTalk.WebApi.Services;
+﻿namespace LetsTalk.Chat.WebApi.Services;
 
 public interface ILetsTalkClient
 {

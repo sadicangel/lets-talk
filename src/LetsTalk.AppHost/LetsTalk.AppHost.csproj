@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ChatService\LetsTalk.WebApi\LetsTalk.WebApi.csproj" />
+    <ProjectReference Include="..\LetsTalk.Chat\LetsTalk.Chat.WebApi\LetsTalk.Chat.WebApi.csproj" />
   </ItemGroup>
 
 </Project>

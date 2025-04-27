@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/LetsTalk.Chat/">
+    <Project Path="src/LetsTalk.Chat/LetsTalk.Chat.WebApi/LetsTalk.Chat.WebApi.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitattributes" />
@@ -11,7 +14,4 @@
   </Folder>
   <Project Path="src/LetsTalk.AppHost/LetsTalk.AppHost.csproj" />
   <Project Path="src/LetsTalk.ServiceDefaults/LetsTalk.ServiceDefaults.csproj" />
-  <Folder Name="/ChatService/">
-    <Project Path="src/ChatService/LetsTalk.WebApi/LetsTalk.WebApi.csproj" />
-  </Folder>
 </Solution>

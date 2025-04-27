@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using LetsTalk.WebApi.Services;
+using LetsTalk.Chat.WebApi.Services;
 using Microsoft.AspNetCore.Authentication;
 using Scalar.AspNetCore;
 

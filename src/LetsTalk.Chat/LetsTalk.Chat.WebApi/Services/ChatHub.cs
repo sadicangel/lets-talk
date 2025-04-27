@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace LetsTalk.WebApi.Services;
+namespace LetsTalk.Chat.WebApi.Services;
 
 internal sealed class ChatHub(ILogger<ChatHub> logger)
     : Hub<ILetsTalkClient>
