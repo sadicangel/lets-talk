@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LetsTalk.ServiceDefaults\LetsTalk.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\LetsTalk.ServiceDefaults\LetsTalk.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

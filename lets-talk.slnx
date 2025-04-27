@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+    <File Path="SpellingExclusions.dic" />
+  </Folder>
+  <Project Path="src/LetsTalk.AppHost/LetsTalk.AppHost.csproj" />
+  <Project Path="src/LetsTalk.ServiceDefaults/LetsTalk.ServiceDefaults.csproj" />
+  <Folder Name="/ChatService/">
+    <Project Path="src/ChatService/LetsTalk.WebApi/LetsTalk.WebApi.csproj" />
+  </Folder>
+</Solution>

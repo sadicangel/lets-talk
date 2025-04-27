@@ -14,10 +14,10 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Packages.props", "."]
 COPY ["Directory.Build.props", "."]
-COPY ["src/LetsTalk.WebApi/LetsTalk.WebApi.csproj", "src/LetsTalk.WebApi/"]
-RUN dotnet restore "./src/LetsTalk.WebApi/LetsTalk.WebApi.csproj"
+COPY ["src/ChatService/LetsTalk.WebApi/LetsTalk.WebApi.csproj", "src/ChatService/LetsTalk.WebApi/"]
+RUN dotnet restore "./src/ChatService/LetsTalk.WebApi/LetsTalk.WebApi.csproj"
 COPY . .
-WORKDIR "/src/src/LetsTalk.WebApi"
+WORKDIR "/src/src/ChatService/LetsTalk.WebApi"
 RUN dotnet build "./LetsTalk.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
