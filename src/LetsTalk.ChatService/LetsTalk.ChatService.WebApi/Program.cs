@@ -1,36 +1,34 @@
 ﻿using System.Security.Claims;
-using LetsTalk.Chat.WebApi.Services;
+using LetsTalk.ChatService.WebApi.ChannelService;
+using LetsTalk.ChatService.WebApi.Services;
 using Microsoft.AspNetCore.Authentication;
-using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-
 builder.Services.AddAuthentication("TestAuth")
     .AddCookie("TestAuth");
 builder.Services.AddAuthorization();
 
-builder.Services.AddOpenApi();
+//builder.Services.AddRefitClient<IChannelApiClient>()
+//    .ConfigureHttpClient(http => ...);
+builder.Services.AddSingleton<IChannelService, TestChannelService>();
+
+builder.Services.AddSingleton<ConnectionManager>();
+
 builder.Services.AddSignalR(options => options.EnableDetailedErrors = builder.Environment.IsDevelopment());
 
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
-
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Automatically sign in a user for testing purposes.
 app.Use(async (context, next) =>
 {
     if (context.User.Identity?.IsAuthenticated is not true)
@@ -44,14 +42,7 @@ app.Use(async (context, next) =>
     await next(context);
 });
 
-app.MapGet("/user", (HttpContext context) => new
-{
-    Id = context.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value,
-    context.User.Identity?.Name
-});
-
-app.MapHub<ChatHub>("/chat", options =>
-{
-});
+app.MapHub<ChatHub>("/chat")
+    .RequireAuthorization();
 
 app.Run();

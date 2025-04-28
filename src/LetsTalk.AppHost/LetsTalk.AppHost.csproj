@@ -10,10 +10,11 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LetsTalk.Chat\LetsTalk.Chat.WebApi\LetsTalk.Chat.WebApi.csproj" />
+    <ProjectReference Include="..\LetsTalk.ChatService\LetsTalk.ChatService.WebApi\LetsTalk.ChatService.WebApi.csproj" />
   </ItemGroup>
 
 </Project>

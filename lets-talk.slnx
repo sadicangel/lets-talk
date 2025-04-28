@@ -1,6 +1,7 @@
 <Solution>
-  <Folder Name="/LetsTalk.Chat/">
-    <Project Path="src/LetsTalk.Chat/LetsTalk.Chat.WebApi/LetsTalk.Chat.WebApi.csproj" />
+  <Folder Name="/LetsTalk.ChatService/">
+    <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.Domain/LetsTalk.ChatService.Domain.csproj" Id="6b6de450-1b43-458b-81b6-0b9bb7bc3f57" />
+    <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.WebApi/LetsTalk.ChatService.WebApi.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />

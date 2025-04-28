@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <UserSecretsId>6ac3dcc9-f169-4e58-9cc8-212dc4b20adc</UserSecretsId>
@@ -9,11 +9,14 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+    <PackageReference Include="Refit" />
+    <PackageReference Include="Refit.HttpClientFactory" />
     <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\LetsTalk.ServiceDefaults\LetsTalk.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\LetsTalk.ChatService.Domain\LetsTalk.ChatService.Domain.csproj" />
   </ItemGroup>
 
 </Project>

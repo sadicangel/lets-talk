@@ -1,6 +1,13 @@
 ﻿var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Projects.LetsTalk_Chat_WebApi>("letstalk-webapi")
-    .WithOpenApiReference("scalar-api-reference", "Scalar API Reference", "scalar/v1");
+var postgres = builder.AddPostgres("letstalk-postgres")
+    .WithDataVolume()
+    .WithPgWeb();
+
+var chatDatabase = postgres.AddDatabase("letstalk-chat-service");
+
+builder.AddProject<Projects.LetsTalk_ChatService_WebApi>("letstalk-chat-service-webapi")
+    .WithOpenApiReference()
+    .WithReference(chatDatabase);
 
 builder.Build().Run();
