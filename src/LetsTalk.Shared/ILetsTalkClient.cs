@@ -1,10 +1,10 @@
-﻿using LetsTalk.ChatService.Domain.Events;
+﻿using LetsTalk.Shared.Events;
 
-namespace LetsTalk.ChatService.Domain;
+namespace LetsTalk.Shared;
 
 public interface ILetsTalkClient
 {
-    //Task OnMessage(MessageEvent @event);
+    Task OnMessage(ChannelMessage @event);
     //Task OnNotification(NotificationEvent @event);
 
     Task OnUserConnected(UserConnected @event);

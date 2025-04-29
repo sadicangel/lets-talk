@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "LetsTalk.ChatClient.Console": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

@@ -1,6 +1,8 @@
 <Solution>
+  <Folder Name="/LetsTalk.ChatClient/">
+    <Project Path="src/LetsTalk.ChatClient/LetsTalk.ChatClient.Console/LetsTalk.ChatClient.Console.csproj" Id="a92805da-8d74-48e4-8a3c-c6c7e64c6bd2" />
+  </Folder>
   <Folder Name="/LetsTalk.ChatService/">
-    <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.Domain/LetsTalk.ChatService.Domain.csproj" Id="6b6de450-1b43-458b-81b6-0b9bb7bc3f57" />
     <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.WebApi/LetsTalk.ChatService.WebApi.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
@@ -15,4 +17,5 @@
   </Folder>
   <Project Path="src/LetsTalk.AppHost/LetsTalk.AppHost.csproj" />
   <Project Path="src/LetsTalk.ServiceDefaults/LetsTalk.ServiceDefaults.csproj" />
+  <Project Path="src/LetsTalk.Shared/LetsTalk.Shared.csproj" Id="a1231816-ed61-41c1-b173-bad3d7ba6dc3" />
 </Solution>
