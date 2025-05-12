@@ -1,24 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <IsAspireHost>true</IsAspireHost>
-    <UserSecretsId>d250b8cb-de1f-4f4a-b4eb-978efee01d2e</UserSecretsId>
+    <UserSecretsId>da44016e-82f1-4246-be8d-4a1c8ab96101</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
-    <PackageReference Include="Aspire.Hosting.NodeJs" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LetsTalk.WebApi\LetsTalk.WebApi.csproj" />
+    <ProjectReference Include="..\LetsTalk.ChatClient\LetsTalk.ChatClient.Console\LetsTalk.ChatClient.Console.csproj" />
+    <ProjectReference Include="..\LetsTalk.ChatService\LetsTalk.ChatService.WebApi\LetsTalk.ChatService.WebApi.csproj" />
+    <ProjectReference Include="..\LetsTalk.IdentityService\LetsTalk.IdentityService.DbMigration\LetsTalk.IdentityService.DbMigration.csproj" />
+    <ProjectReference Include="..\LetsTalk.IdentityService\LetsTalk.IdentityService.WebApi\LetsTalk.IdentityService.WebApi.csproj" />
   </ItemGroup>
 
 </Project>
