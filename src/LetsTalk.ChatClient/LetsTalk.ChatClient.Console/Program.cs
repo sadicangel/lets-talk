@@ -1,27 +1,42 @@
-﻿using System.Net.Http.Json;
-using LetsTalk.Shared.AuthModels;
-using LetsTalk.Shared.Events;
+﻿using LetsTalk.Shared.Events;
+using LetsTalk.Shared.IdentityService;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Refit;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
+builder.Services.AddRefitClient<IIdentityServiceApi>()
+    .ConfigureHttpClient(http => http.BaseAddress = new Uri("https+http://letstalk-identity-service-webapi"));
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
-var http = app.Services.GetRequiredService<IHttpClientFactory>().CreateClient();
-http.BaseAddress = new Uri("https+http://letstalk-chat-service-webapi/");
-http.DefaultRequestHeaders.Add("Accept", "application/json");
-var userIdentity = await http.GetFromJsonAsync<LoginResponse>("/login");
+var username = "test";
+var password = "Test1234!";
+var email = "test@letstalk.com";
+
+string? accessToken = null;
+try
+{
+    var identityService = app.Services.GetRequiredService<IIdentityServiceApi>();
+    try { await identityService.RegisterAsync(new RegisterRequest(username, password, email)); } catch (ValidationApiException) { /* Ignore if user already exists */ }
+    var accessTokenResponse = await identityService.LoginAsync(new LoginRequest(username, password));
+    accessToken = accessTokenResponse.AccessToken;
+}
+catch (ApiException ex)
+{
+    Console.WriteLine($"API Error: {ex.StatusCode} - {ex.Content}");
+    throw;
+}
 
 // https+http://letstalk-chat-service-webapi/chat
 var connection = new HubConnectionBuilder()
     .WithUrl("https+http://letstalk-chat-service-webapi/chat", options =>
     {
-        options.AccessTokenProvider = () => Task.FromResult(userIdentity?.AccessToken);
+        options.AccessTokenProvider = () => Task.FromResult<string?>(accessToken);
         options.HttpMessageHandlerFactory = _ => app.Services.GetRequiredService<IHttpMessageHandlerFactory>().CreateHandler();
     })
     .WithAutomaticReconnect()

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "LetsTalk.IdentityService.DbMigration": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

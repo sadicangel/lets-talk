@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace LetsTalk.Shared;
 
@@ -9,21 +10,21 @@ public static class UserClaimsExtensions
     public static string GetUserId(this ClaimsPrincipal? claimsPrincipal)
     {
         ArgumentNullException.ThrowIfNull(claimsPrincipal);
-        var userId = claimsPrincipal?.FindFirst(ClaimTypes.NameIdentifier);
+        var userId = claimsPrincipal?.FindFirst(JwtRegisteredClaimNames.Sub);
         return userId?.Value ?? string.Empty;
     }
 
     public static string GetUserName(this ClaimsPrincipal? claimsPrincipal)
     {
         ArgumentNullException.ThrowIfNull(claimsPrincipal);
-        var userName = claimsPrincipal?.FindFirst(ClaimTypes.Name);
+        var userName = claimsPrincipal?.FindFirst(JwtRegisteredClaimNames.Name);
         return userName?.Value ?? string.Empty;
     }
 
     public static string? GetAvatarUrl(this ClaimsPrincipal? claimsPrincipal)
     {
         ArgumentNullException.ThrowIfNull(claimsPrincipal);
-        var avatarUrl = claimsPrincipal?.FindFirst(ClaimTypes.UserData);
+        var avatarUrl = claimsPrincipal?.FindFirst(JwtRegisteredClaimNames.Picture);
         return avatarUrl?.Value;
     }
 
