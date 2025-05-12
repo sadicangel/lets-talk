@@ -21,7 +21,7 @@ public sealed class JwtBearerTokenProvider(IOptions<JwtBearerTokenProviderOption
             issuer: options.Value.Issuer,
             audience: options.Value.Audience,
             claims: [
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? ""),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id ?? ""),
                 new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? ""),
                 new Claim(JwtRegisteredClaimNames.Picture, ""),
             ],

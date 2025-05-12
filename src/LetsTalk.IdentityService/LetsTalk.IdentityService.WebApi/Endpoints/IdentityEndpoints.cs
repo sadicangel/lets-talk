@@ -37,7 +37,7 @@ public static class IdentityEndpoints
 
         if (!s_emailAddressAttribute.IsValid(registration.Email))
         {
-            return CreateValidationProblem(IdentityResult.Failed(userManager.ErrorDescriber.InvalidUserName(registration.Email)));
+            return CreateValidationProblem(IdentityResult.Failed(userManager.ErrorDescriber.InvalidEmail(registration.Email)));
         }
 
         var user = new IdentityUser();

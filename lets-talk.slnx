@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/LetsTalk.ChannelService/">
+    <Project Path="src/LetsTalk.ChannelService/LetsTalk.ChannelService.DbMigration/LetsTalk.ChannelService.DbMigration.csproj" Id="f5b555af-7950-4726-b18a-29ad49366533" />
+    <Project Path="src/LetsTalk.ChannelService/LetsTalk.ChannelService.WebApi/LetsTalk.ChannelService.WebApi.csproj" Id="a6a94968-f5a0-4170-9681-ee0ba22382e6" />
+  </Folder>
   <Folder Name="/LetsTalk.ChatClient/">
     <Project Path="src/LetsTalk.ChatClient/LetsTalk.ChatClient.Console/LetsTalk.ChatClient.Console.csproj" Id="a92805da-8d74-48e4-8a3c-c6c7e64c6bd2" />
   </Folder>
