@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "LetsTalk.ChannelService.DbMigration": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

@@ -1,5 +1,4 @@
 ﻿using LetsTalk.IdentityService.WebApi;
-using LetsTalk.IdentityService.WebApi.Endpoints;
 using LetsTalk.IdentityService.WebApi.Services;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
@@ -8,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.AddNpgsqlDbContext<IdentityDbContext>("letstalk-identity-service");
+builder.AddNpgsqlDbContext<IdentityDbContext>("letstalk-identity-service-db");
 
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddEntityFrameworkStores<IdentityDbContext>()

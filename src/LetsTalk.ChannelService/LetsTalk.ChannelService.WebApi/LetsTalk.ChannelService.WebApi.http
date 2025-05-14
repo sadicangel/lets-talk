@@ -1,0 +1,6 @@
+@LetsTalk.ChannelService.WebApi_HostAddress = http://localhost:5098
+
+GET {{LetsTalk.ChannelService.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

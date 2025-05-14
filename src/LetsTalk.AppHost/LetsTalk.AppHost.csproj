@@ -14,6 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LetsTalk.ChannelService\LetsTalk.ChannelService.DbMigration\LetsTalk.ChannelService.DbMigration.csproj" />
+    <ProjectReference Include="..\LetsTalk.ChannelService\LetsTalk.ChannelService.WebApi\LetsTalk.ChannelService.WebApi.csproj" />
     <ProjectReference Include="..\LetsTalk.ChatClient\LetsTalk.ChatClient.Console\LetsTalk.ChatClient.Console.csproj" />
     <ProjectReference Include="..\LetsTalk.ChatService\LetsTalk.ChatService.WebApi\LetsTalk.ChatService.WebApi.csproj" />
     <ProjectReference Include="..\LetsTalk.IdentityService\LetsTalk.IdentityService.DbMigration\LetsTalk.IdentityService.DbMigration.csproj" />

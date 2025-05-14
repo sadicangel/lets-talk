@@ -1,6 +1,6 @@
-﻿using LetsTalk.ChatService.WebApi.ChannelService;
-using LetsTalk.Shared;
+﻿using LetsTalk.Shared;
 using LetsTalk.Shared.Events;
+using LetsTalk.Shared.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace LetsTalk.ChatService.WebApi.Services;
@@ -19,8 +19,8 @@ internal sealed class ChatHub(
         logger.LogInformation("User connected: {@User} ({ConnectionId})", user, Context.ConnectionId);
 
         // Add user to groups based on channels
-        var response = await channelService.GetUserChannelListAsync(user.UserId);
-        await Task.WhenAll(response.Channels.Select(channel => Groups.AddToGroupAsync(Context.ConnectionId, channel.Id)));
+        var response = await channelService.GetChannels(user.UserId);
+        await Task.WhenAll(response.Channels.Select(channel => Groups.AddToGroupAsync(Context.ConnectionId, channel)));
 
         // Notify users in the same groups about user joining (for the first time)
         var connections = connectionManager.GetConnections(user.UserId);
@@ -40,8 +40,8 @@ internal sealed class ChatHub(
         logger.LogInformation("User disconnected: {@User} ({ConnectionId})", user, Context.ConnectionId);
 
         // Remove user from groups
-        var response = await channelService.GetUserChannelListAsync(user.UserId);
-        await Task.WhenAll(response.Channels.Select(channel => Groups.RemoveFromGroupAsync(Context.ConnectionId, channel.Id)));
+        var response = await channelService.GetChannels(user.UserId);
+        await Task.WhenAll(response.Channels.Select(channel => Groups.RemoveFromGroupAsync(Context.ConnectionId, channel)));
 
         // Notify users in the same groups about user leaving
         var connections = connectionManager.GetConnections(user.UserId);
