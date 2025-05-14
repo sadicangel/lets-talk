@@ -1,10 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LetsTalk.ChannelService.WebApi.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 
 namespace LetsTalk.ChannelService.WebApi;
 
 public class ChannelDbContext(DbContextOptions<ChannelDbContext> options) : DbContext(options)
 {
     public required virtual DbSet<Channel> Channels { get; set; }
+    public required virtual DbSet<ChannelMember> Members { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -13,6 +17,9 @@ public class ChannelDbContext(DbContextOptions<ChannelDbContext> options) : DbCo
         modelBuilder.Entity<Channel>(channel =>
         {
             channel.HasKey(c => c.Id);
+            channel.Property(c => c.Id)
+                .ValueGeneratedOnAdd()
+                .HasValueGenerator<GuidV7ValueGenerator>();
             channel.Property(c => c.Name).IsRequired();
         });
 
@@ -33,37 +40,9 @@ public class ChannelDbContext(DbContextOptions<ChannelDbContext> options) : DbCo
     }
 }
 
-public sealed class Channel
+public class GuidV7ValueGenerator : ValueGenerator<string>
 {
-    public required string Id { get; init; }
-    public required string Name { get; set; }
-    public string? Description { get; set; }
-    public List<ChannelMember> Members { get; init; } = default!;
-}
+    public override bool GeneratesTemporaryValues => false;
 
-public enum ChannelRole
-{
-    Member,
-    Moderator,
-    Admin
-}
-public enum ChannelMembershipStatus
-{
-    Active,
-    Muted,
-    Banned,
-    Invited,
-    Pending,
-}
-
-public sealed class ChannelMember
-{
-    public required string ChannelId { get; init; }
-    public Channel Channel { get; init; } = null!;
-    public required string UserId { get; init; }
-    public required DateTimeOffset MemberSince { get; init; }
-    public required DateTimeOffset LastSeenAt { get; set; }
-    public ChannelRole Role { get; set; }
-    public ChannelMembershipStatus Status { get; set; }
-    public string? InvitedByUserId { get; set; }
+    public override string Next(EntityEntry entry) => Guid.CreateVersion7().ToString();
 }

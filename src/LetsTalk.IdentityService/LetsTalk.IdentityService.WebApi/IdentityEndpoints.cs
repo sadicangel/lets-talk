@@ -1,27 +1,27 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using LetsTalk.IdentityService.WebApi.Services;
-using LetsTalk.Shared.IdentityService;
+using LetsTalk.Shared.Services;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-namespace LetsTalk.IdentityService.WebApi.Endpoints;
+namespace LetsTalk.IdentityService.WebApi;
 
 public static class IdentityEndpoints
 {
     // Validate the email address using DataAnnotations like the UserValidator does when RequireUniqueEmail = true.
     private static readonly EmailAddressAttribute s_emailAddressAttribute = new();
 
-    public static IEndpointRouteBuilder MapIdentityEndpoints(this IEndpointRouteBuilder endpoints)
+    public static IEndpointConventionBuilder MapIdentityEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var api = endpoints.MapGroup("api");
         api.MapPost("/register", Register);
         api.MapPost("/login", Login);
         api.MapPost("/refresh", Refresh);
-        return endpoints;
+        return api;
     }
 
     private static async Task<Results<Ok, ValidationProblem>> Register(
@@ -31,14 +31,10 @@ public static class IdentityEndpoints
         IUserStore<IdentityUser> userStore)
     {
         if (string.IsNullOrEmpty(registration.UserName))
-        {
             return CreateValidationProblem(IdentityResult.Failed(userManager.ErrorDescriber.InvalidUserName(registration.UserName)));
-        }
 
         if (!s_emailAddressAttribute.IsValid(registration.Email))
-        {
             return CreateValidationProblem(IdentityResult.Failed(userManager.ErrorDescriber.InvalidEmail(registration.Email)));
-        }
 
         var user = new IdentityUser();
         await userStore.SetUserNameAsync(user, registration.UserName, CancellationToken.None);
@@ -47,9 +43,7 @@ public static class IdentityEndpoints
         var result = await userManager.CreateAsync(user, registration.Password);
 
         if (!result.Succeeded)
-        {
             return CreateValidationProblem(result);
-        }
 
         await SendConfirmationEmailAsync(user, userManager, context, registration.Email);
         return TypedResults.Ok();
@@ -64,16 +58,12 @@ public static class IdentityEndpoints
 
         var user = await signInManager.UserManager.FindByNameAsync(login.UserName);
         if (user is null)
-        {
             return TypedResults.Problem(SignInResult.Failed.ToString(), statusCode: StatusCodes.Status401Unauthorized);
-        }
 
         var result = await signInManager.CheckPasswordSignInAsync(user, login.Password, lockoutOnFailure: false);
 
         if (!result.Succeeded)
-        {
             return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
-        }
 
         var (accessToken, refreshToken, expiresIn) = await tokenProvider.GenerateAsync(user);
 

@@ -66,7 +66,7 @@ namespace LetsTalk.ChannelService.DbMigration.Migrations
 
                     b.HasKey("ChannelId", "UserId");
 
-                    b.ToTable("ChannelMember");
+                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("LetsTalk.ChannelService.WebApi.ChannelMember", b =>

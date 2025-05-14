@@ -1,9 +1,10 @@
 ﻿#pragma warning disable IDE0130 // Namespace does not match folder structure
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace LetsTalk.Shared;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
 public static class LetsTalkExtensions

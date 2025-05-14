@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication.BearerToken;
 using Refit;
 
-namespace LetsTalk.Shared.IdentityService;
+namespace LetsTalk.Shared.Services;
 
-public interface IIdentityServiceApi
+public interface IIdentityService
 {
     [Post("/api/register")]
     Task RegisterAsync([Body] RegisterRequest request, CancellationToken cancellationToken = default);

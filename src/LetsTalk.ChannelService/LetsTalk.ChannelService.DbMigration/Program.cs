@@ -7,7 +7,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.AddNpgsqlDbContext<ChannelDbContext>("letstalk-channel-service",
+builder.AddNpgsqlDbContext<ChannelDbContext>("letstalk-channel-service-db",
     configureDbContextOptions: options => options.UseNpgsql(builder => builder.MigrationsAssembly(typeof(Program).Assembly)));
 
 var app = builder.Build();

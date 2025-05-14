@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\LetsTalk.ServiceDefaults\LetsTalk.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\LetsTalk.Shared\LetsTalk.Shared.csproj" />
   </ItemGroup>
 

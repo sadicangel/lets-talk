@@ -1,7 +1,10 @@
-﻿using LetsTalk.ChatService.WebApi.ChannelService;
-using LetsTalk.ChatService.WebApi.Services;
+﻿using LetsTalk.ChatService.WebApi.Services;
+using LetsTalk.Shared;
+using LetsTalk.Shared.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
+using Refit;
 
 var jwtKey = new SymmetricSecurityKey(new byte[32])
 {
@@ -13,26 +16,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.MapInboundClaims = false;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"]!,
-            ValidateAudience = false,
-            ValidAudience = builder.Configuration["Jwt:Audience"]!,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(builder.Configuration["Jwt:SecurityKey"]!)),
-        };
-    });
-
+    .AddLetsTalkJwtBearer(builder.Configuration.GetRequiredSection("Jwt"));
 builder.Services.AddAuthorization();
 
-//builder.Services.AddRefitClient<IChannelApiClient>()
-//    .ConfigureHttpClient(http => ...);
-builder.Services.AddSingleton<IChannelService, TestChannelService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddRefitClient<IChannelService>(provider => new RefitSettings
+{
+    AuthorizationHeaderValueGetter = (_, ct) => Task.FromResult(provider
+        .GetRequiredService<IHttpContextAccessor>()
+        .HttpContext?.Request.Headers[HeaderNames.Authorization]
+        .FirstOrDefault()?.Replace("Bearer ", "") ?? "")
+})
+    .ConfigureHttpClient(http => http.BaseAddress = new Uri("https://letstalk-channel-service-webapi"));
 
 builder.Services.AddSingleton<ConnectionManager>();
 

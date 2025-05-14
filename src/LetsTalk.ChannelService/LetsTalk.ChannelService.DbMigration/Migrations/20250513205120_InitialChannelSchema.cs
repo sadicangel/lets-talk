@@ -25,7 +25,7 @@ namespace LetsTalk.ChannelService.DbMigration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChannelMember",
+                name: "Members",
                 columns: table => new
                 {
                     ChannelId = table.Column<string>(type: "text", nullable: false),
@@ -38,9 +38,9 @@ namespace LetsTalk.ChannelService.DbMigration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChannelMember", x => new { x.ChannelId, x.UserId });
+                    table.PrimaryKey("PK_Members", x => new { x.ChannelId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_ChannelMember_Channels_ChannelId",
+                        name: "FK_Members_Channels_ChannelId",
                         column: x => x.ChannelId,
                         principalTable: "Channels",
                         principalColumn: "Id",
@@ -52,7 +52,7 @@ namespace LetsTalk.ChannelService.DbMigration.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ChannelMember");
+                name: "Members");
 
             migrationBuilder.DropTable(
                 name: "Channels");
