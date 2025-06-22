@@ -1,10 +1,9 @@
-﻿using LetsTalk.ChatService.WebApi.Services;
+﻿using LetsTalk.ChatService.Domain;
+using LetsTalk.ChatService.WebApi.Channels;
+using LetsTalk.ChatService.WebApi.Hubs;
 using LetsTalk.Shared;
-using LetsTalk.Shared.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
-using Refit;
 
 var jwtKey = new SymmetricSecurityKey(new byte[32])
 {
@@ -15,19 +14,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+builder.AddNpgsqlDbContext<ChatDbContext>("letstalk-chat-service-db");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddLetsTalkJwtBearer(builder.Configuration.GetRequiredSection("Jwt"));
 builder.Services.AddAuthorization();
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddRefitClient<IChannelService>(provider => new RefitSettings
-{
-    AuthorizationHeaderValueGetter = (_, ct) => Task.FromResult(provider
-        .GetRequiredService<IHttpContextAccessor>()
-        .HttpContext?.Request.Headers[HeaderNames.Authorization]
-        .FirstOrDefault()?.Replace("Bearer ", "") ?? "")
-})
-    .ConfigureHttpClient(http => http.BaseAddress = new Uri("https://letstalk-channel-service-webapi"));
 
 builder.Services.AddSingleton<ConnectionManager>();
 
@@ -42,7 +33,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<ChatHub>("/chat")
-    .RequireAuthorization();
+app.MapChannelEndpoints().RequireAuthorization();
+app.MapHub<ChatHub>("/chat").RequireAuthorization();
 
 app.Run();

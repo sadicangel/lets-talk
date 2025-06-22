@@ -18,31 +18,23 @@ var identityService = builder.AddProject<Projects.LetsTalk_IdentityService_WebAp
     .WithReference(identityDatabase)
     .WaitFor(identityDbMigration);
 
-var channelDatabase = postgres.AddDatabase("letstalk-channel-service-db");
-var channelDbMigration = builder.AddProject<Projects.LetsTalk_ChannelService_DbMigration>("letstalk-channel-service-db-migration")
-    .WithReference(channelDatabase)
-    .WaitFor(channelDatabase);
-var channelService = builder.AddProject<Projects.LetsTalk_ChannelService_WebApi>("letstalk-channel-service-webapi")
-    .WithOpenApiReference()
-    .WithEnvironment("Jwt__SecurityKey", securityKey)
-    .WithReference(channelDatabase)
-    .WithReference(identityService)
-    .WaitFor(channelDbMigration);
-
 var chatDatabase = postgres.AddDatabase("letstalk-chat-service-db");
+var chatDbMigration = builder.AddProject<Projects.LetsTalk_ChatService_DbMigration>("letstalk-chat-service-db-migration")
+    .WithReference(chatDatabase)
+    .WaitFor(chatDatabase);
 var chatService = builder.AddProject<Projects.LetsTalk_ChatService_WebApi>("letstalk-chat-service-webapi")
     .WithOpenApiReference()
     .WithEnvironment("Jwt__SecurityKey", securityKey)
     .WithReference(chatDatabase)
-    .WithReference(channelService)
+    .WithReference(chatDbMigration)
     .WithReference(identityService);
 
 builder.AddProject<Projects.LetsTalk_ChatClient_Console>("letstalk-chat-client-console")
     .WithReference(identityService)
-    .WithReference(channelService)
     .WithReference(chatService)
     .WaitFor(identityService)
-    .WaitFor(channelService)
-    .WaitFor(chatService);
+    .WaitFor(chatService)
+    .WithExplicitStart()
+    .ExcludeFromManifest();
 
 builder.Build().Run();

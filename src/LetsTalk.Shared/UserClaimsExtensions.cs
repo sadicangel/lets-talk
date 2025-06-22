@@ -3,8 +3,6 @@ using System.Security.Claims;
 
 namespace LetsTalk.Shared;
 
-public readonly record struct UserIdentity(string UserId, string UserName, string? AvatarUrl);
-
 public static class UserClaimsExtensions
 {
     public static string GetUserId(this ClaimsPrincipal? claimsPrincipal)
