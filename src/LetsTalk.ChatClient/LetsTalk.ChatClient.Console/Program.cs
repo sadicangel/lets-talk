@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Refit;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -34,6 +35,8 @@ catch (ValidationApiException)
     /* Ignore if user already exists */
 }
 
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
 // Ensure chats exist.
 var channelService = app.Services.GetRequiredService<IChannelService>();
 var response = await channelService.GetChannels();
@@ -53,32 +56,32 @@ var connection = new HubConnectionBuilder()
 
 connection.On<ChannelMessage>("OnMessage", message =>
 {
-    Console.WriteLine($"[Message] {message.UserId}: {System.Text.Encoding.UTF8.GetString(message.Content)}");
+    logger.LogInformation("[Message] (from {@UserName}): {@Message}", message.Author.UserName, System.Text.Encoding.UTF8.GetString(message.Content));
 });
 
-connection.On<UserConnected>("OnUserConnected", payload =>
+connection.On<UserConnected>("OnUserConnected", message =>
 {
-    Console.WriteLine($"[User Connected] {payload.ConnectingUser.UserName} (Total online: {payload.Users.Count()})");
+    logger.LogInformation("[User Connected] {@UserName} (Total online: {@OnlineUsers})", message.ConnectingUser.UserName, message.OnlineUsers.Count());
 });
 
-connection.On<UserDisconnected>("OnUserDisconnected", payload =>
+connection.On<UserDisconnected>("OnUserDisconnected", message =>
 {
-    Console.WriteLine($"[User Disconnected] {payload.DisconnectingUser.UserName} (Total online: {payload.Users.Count()})");
+    logger.LogInformation("[User Disconnected] {@UserName} (Total online: {@OnlineUsers})", message.DisconnectingUser.UserName, message.OnlineUsers.Count());
 });
 
 try
 {
-    Console.WriteLine("Connecting...");
+    logger.LogInformation("Connecting...");
     await connection.StartAsync();
-    Console.WriteLine("Connected!");
+    logger.LogInformation("Connected!");
 
     // Simple loop to send messages
     //while (true)
     //{
-    //    Console.Write("Enter channel ID: ");
-    //    var channelId = Console.ReadLine()!;
-    //    Console.Write("Enter message: ");
-    //    var msg = Console.ReadLine()!;
+    //    logger.Write("Enter channel ID: ");
+    //    var channelId = logger.ReadLine()!;
+    //    logger.Write("Enter message: ");
+    //    var msg = logger.ReadLine()!;
 
     var content = System.Text.Encoding.UTF8.GetBytes("Test message");
     await connection.InvokeAsync("SendChannelMessage", "1", "text/plain", content);
@@ -86,7 +89,7 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Connection failed: {ex.Message}");
+    logger.LogError(ex, "Connection failed");
 }
 
 sealed class CredentialsCache(IServiceProvider serviceProvider)

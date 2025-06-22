@@ -43,6 +43,8 @@ builder.AddProject<Projects.LetsTalk_ChatClient_Console>("letstalk-chat-client-c
     .WithReference(chatService)
     .WaitFor(identityService)
     .WaitFor(channelService)
-    .WaitFor(chatService);
+    .WaitFor(chatService)
+    .WithExplicitStart()
+    .ExcludeFromManifest();
 
 builder.Build().Run();

@@ -28,7 +28,7 @@ public sealed class ConnectionManager
     {
         if (_connectionUser.TryRemove(connectionId, out var userId))
         {
-            if (_userConnections[userId].TryRemove(connectionId, out _) && _userConnections.Count == 0)
+            if (_userConnections[userId].TryRemove(connectionId, out _) && _userConnections.IsEmpty)
             {
                 _ = _userConnections.TryRemove(userId, out _);
                 _ = _userIdentities.TryRemove(userId, out _);

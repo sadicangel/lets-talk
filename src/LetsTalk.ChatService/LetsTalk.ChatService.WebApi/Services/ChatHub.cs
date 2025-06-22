@@ -54,7 +54,7 @@ internal sealed class ChatHub(
 
     public async Task SendChannelMessage(string channelId, string contentType, byte[] content)
     {
-        var message = new ChannelMessage(channelId, Context.User.GetUserId(), contentType, content);
+        var message = new ChannelMessage(channelId, Context.User.GetUserIdentity(), contentType, content);
 
         // Send message to all clients in the group.
         await Clients.Group(channelId).OnMessage(message);
