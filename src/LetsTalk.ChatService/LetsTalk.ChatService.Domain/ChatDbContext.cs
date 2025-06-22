@@ -1,11 +1,11 @@
-﻿using LetsTalk.ChannelService.WebApi.Entities;
+﻿using LetsTalk.ChatService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 
-namespace LetsTalk.ChannelService.WebApi;
+namespace LetsTalk.ChatService.Domain;
 
-public class ChannelDbContext(DbContextOptions<ChannelDbContext> options) : DbContext(options)
+public class ChatDbContext(DbContextOptions<ChatDbContext> options) : DbContext(options)
 {
     public required virtual DbSet<Channel> Channels { get; set; }
     public required virtual DbSet<ChannelMember> Members { get; set; }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using LetsTalk.Shared;
 
-namespace LetsTalk.ChatService.WebApi.Services;
+namespace LetsTalk.ChatService.WebApi.Hubs;
 
 public sealed class ConnectionManager
 {

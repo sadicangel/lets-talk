@@ -1,7 +1,7 @@
 ﻿using Refit;
 
 namespace LetsTalk.Shared.Services;
-public interface IChannelService
+public interface IChatService
 {
     [Get("/api/channels")]
     [Headers("Authorization: Bearer")]

@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace LetsTalk.ChannelService.DbMigration.Migrations
+namespace LetsTalk.ChatService.DbMigration.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialChannelSchema : Migration
+    public partial class InitialChatSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

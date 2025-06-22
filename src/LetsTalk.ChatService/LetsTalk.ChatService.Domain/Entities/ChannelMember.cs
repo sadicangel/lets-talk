@@ -1,4 +1,4 @@
-﻿namespace LetsTalk.ChannelService.WebApi.Entities;
+﻿namespace LetsTalk.ChatService.Domain.Entities;
 
 public sealed class ChannelMember
 {

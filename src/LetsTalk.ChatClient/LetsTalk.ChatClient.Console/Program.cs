@@ -16,11 +16,11 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddRefitClient<IIdentityService>()
     .ConfigureHttpClient(http => http.BaseAddress = new Uri("https+http://letstalk-identity-service-webapi"));
-builder.Services.AddRefitClient<IChannelService>(services => new RefitSettings
+builder.Services.AddRefitClient<IChatService>(services => new RefitSettings
 {
     AuthorizationHeaderValueGetter = (_, ct) => services.GetRequiredService<CredentialsCache>().GetBearerTokenAsync(ct)
 })
-    .ConfigureHttpClient(http => http.BaseAddress = new Uri("https+http://letstalk-channel-service-webapi"));
+    .ConfigureHttpClient(http => http.BaseAddress = new Uri("https+http://letstalk-chat-service-webapi"));
 
 var app = builder.Build();
 
@@ -38,11 +38,11 @@ catch (ValidationApiException)
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 // Ensure chats exist.
-var channelService = app.Services.GetRequiredService<IChannelService>();
-var response = await channelService.GetChannels();
+var chatService = app.Services.GetRequiredService<IChatService>();
+var response = await chatService.GetChannels();
 if (response.Channels.Length == 0)
 {
-    await channelService.CreateChannel(new ChannelRequest("General", "General chat"));
+    await chatService.CreateChannel(new ChannelRequest("General", "General chat"));
 }
 
 var connection = new HubConnectionBuilder()

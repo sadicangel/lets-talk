@@ -1,6 +1,6 @@
 ﻿namespace LetsTalk.Shared.Events;
 public sealed record class ChannelMessage(
-    string ChannelId,
+    ChannelIdentity Channel,
     UserIdentity Author,
     string ContentType,
     byte[] Content) : HubEvent;

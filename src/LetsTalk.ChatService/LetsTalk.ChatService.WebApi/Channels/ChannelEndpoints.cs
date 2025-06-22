@@ -1,26 +1,35 @@
-﻿using LetsTalk.ChannelService.WebApi.Entities;
+﻿using LetsTalk.ChatService.Domain;
+using LetsTalk.ChatService.Domain.Entities;
+using LetsTalk.ChatService.WebApi.Hubs;
 using LetsTalk.Shared;
+using LetsTalk.Shared.Events;
 using LetsTalk.Shared.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
-namespace LetsTalk.ChannelService.WebApi;
+namespace LetsTalk.ChatService.WebApi.Channels;
 
 public static class ChannelEndpoints
 {
     public static IEndpointConventionBuilder MapChannelEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var api = endpoints.MapGroup("api");
+
         api.MapGet("/channels", GetChannels);
         api.MapGet("/channels/{channelId}", GetChannel);
         api.MapPost("/channels", CreateChannel);
         api.MapPut("/channels/{channelId}", UpdateChannel);
         api.MapDelete("/channels/{channelId}", DeleteChannel);
+
+        api.MapGet("/channels/{channelId}/join", JoinChannel);
+        api.MapGet("/channels/{channelId}/leave", LeaveChannel);
+
         return api;
     }
 
-    private static async Task<Ok<ChannelListResponse>> GetChannels(string? userId, ChannelDbContext dbContext)
+    private static async Task<Ok<ChannelListResponse>> GetChannels(string? userId, ChatDbContext dbContext)
     {
         var channels = string.IsNullOrWhiteSpace(userId)
             ? await dbContext.Channels.AsNoTracking().Select(c => c.Id).ToArrayAsync()
@@ -29,7 +38,7 @@ public static class ChannelEndpoints
         return TypedResults.Ok(new ChannelListResponse(channels));
     }
 
-    private static async Task<Results<Ok<ChannelResponse>, NotFound>> GetChannel(string channelId, ChannelDbContext dbContext)
+    private static async Task<Results<Ok<ChannelResponse>, NotFound>> GetChannel(string channelId, ChatDbContext dbContext)
     {
         var channel = await dbContext.Channels.FindAsync(channelId);
         if (channel is null)
@@ -46,7 +55,7 @@ public static class ChannelEndpoints
 
     private static async Task<Results<Created<ChannelResponse>, ValidationProblem>> CreateChannel(
         ChannelRequest request,
-        ChannelDbContext dbContext,
+        ChatDbContext dbContext,
         TimeProvider timeProvider,
         HttpContext httpContext)
     {
@@ -91,7 +100,7 @@ public static class ChannelEndpoints
     private static async Task<Results<Ok<ChannelResponse>, NotFound, UnauthorizedHttpResult, ValidationProblem>> UpdateChannel(
         string channelId,
         [FromBody] ChannelRequest request,
-        ChannelDbContext dbContext,
+        ChatDbContext dbContext,
         HttpContext httpContext)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
@@ -131,7 +140,7 @@ public static class ChannelEndpoints
 
     private static async Task<Results<NoContent, NotFound, UnauthorizedHttpResult>> DeleteChannel(
         string channelId,
-        ChannelDbContext dbContext,
+        ChatDbContext dbContext,
         HttpContext httpContext)
     {
         var channel = await dbContext.Channels.FindAsync(channelId);
@@ -150,5 +159,72 @@ public static class ChannelEndpoints
         await dbContext.SaveChangesAsync();
 
         return TypedResults.NoContent();
+    }
+
+    private static async Task<Results<Ok, NotFound>> JoinChannel(
+        string channelId,
+        ChatDbContext dbContext,
+        HttpContext httpContext,
+        IHubContext<ChatHub, ILetsTalkClient> hubContext)
+    {
+        var channel = await dbContext.Channels.FindAsync(channelId);
+        if (channel is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        var member = channel.Members.Find(x => x.UserId == httpContext.User.GetUserId());
+        if (member is not null)
+        {
+            // Already a member, no need to join again.
+            return TypedResults.Ok();
+        }
+
+        channel.Members.Add(new ChannelMember
+        {
+            ChannelId = channel.Id,
+            UserId = httpContext.User.GetUserId(),
+            MemberSince = TimeProvider.System.GetUtcNow(),
+            LastSeenAt = TimeProvider.System.GetUtcNow(),
+            Role = ChannelRole.Member,
+            Status = ChannelMembershipStatus.Active,
+            InvitedByUserId = null
+        });
+
+        await dbContext.SaveChangesAsync();
+
+        await hubContext.Clients.Group(channelId).OnChannelMemberJoined(
+            new ChannelMemberJoined(channel.ToIdentity(), httpContext.User.GetUserIdentity()));
+
+        return TypedResults.Ok();
+    }
+
+    private static async Task<Results<Ok, NotFound>> LeaveChannel(
+        string channelId,
+        ChatDbContext dbContext,
+        HttpContext httpContext,
+        IHubContext<ChatHub, ILetsTalkClient> hubContext)
+    {
+        var channel = await dbContext.Channels.FindAsync(channelId);
+        if (channel is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        var member = channel.Members.Find(x => x.UserId == httpContext.User.GetUserId());
+        if (member is null)
+        {
+            // Not a member, no need to remove.
+            return TypedResults.Ok();
+        }
+
+        channel.Members.Remove(member);
+
+        await dbContext.SaveChangesAsync();
+
+        await hubContext.Clients.Group(channelId).OnChannelMemberLeft(
+            new ChannelMemberLeft(channel.ToIdentity(), httpContext.User.GetUserIdentity()));
+
+        return TypedResults.Ok();
     }
 }

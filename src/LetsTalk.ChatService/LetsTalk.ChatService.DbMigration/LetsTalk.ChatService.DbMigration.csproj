@@ -2,24 +2,19 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\LetsTalk.ChannelService\LetsTalk.ChannelService.WebApi\LetsTalk.ChannelService.WebApi.csproj" />
     <ProjectReference Include="..\..\LetsTalk.ServiceDefaults\LetsTalk.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\LetsTalk.ChatService.Domain\LetsTalk.ChatService.Domain.csproj" />
   </ItemGroup>
 
 </Project>

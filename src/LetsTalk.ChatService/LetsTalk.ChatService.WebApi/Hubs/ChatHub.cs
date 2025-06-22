@@ -1,13 +1,16 @@
-﻿using LetsTalk.Shared;
+﻿using LetsTalk.ChatService.Domain;
+using LetsTalk.ChatService.Domain.Entities;
+using LetsTalk.Shared;
 using LetsTalk.Shared.Events;
-using LetsTalk.Shared.Services;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
-namespace LetsTalk.ChatService.WebApi.Services;
+namespace LetsTalk.ChatService.WebApi.Hubs;
 
-internal sealed class ChatHub(
+public sealed class ChatHub(
     ConnectionManager connectionManager,
-    IChannelService channelService, ILogger<ChatHub> logger)
+    ChatDbContext dbContext,
+    ILogger<ChatHub> logger)
     : Hub<ILetsTalkClient>
 {
     public override async Task OnConnectedAsync()
@@ -19,8 +22,8 @@ internal sealed class ChatHub(
         logger.LogInformation("User connected: {@User} ({ConnectionId})", user, Context.ConnectionId);
 
         // Add user to groups based on channels
-        var response = await channelService.GetChannels(user.UserId);
-        await Task.WhenAll(response.Channels.Select(channel => Groups.AddToGroupAsync(Context.ConnectionId, channel)));
+        var userChannels = await dbContext.Members.AsNoTracking().Where(m => m.UserId == user.UserId).ToArrayAsync();
+        await Task.WhenAll(userChannels.Select(channel => Groups.AddToGroupAsync(Context.ConnectionId, channel.ChannelId)));
 
         // Notify users in the same groups about user joining (for the first time)
         var connections = connectionManager.GetConnections(user.UserId);
@@ -40,8 +43,8 @@ internal sealed class ChatHub(
         logger.LogInformation("User disconnected: {@User} ({ConnectionId})", user, Context.ConnectionId);
 
         // Remove user from groups
-        var response = await channelService.GetChannels(user.UserId);
-        await Task.WhenAll(response.Channels.Select(channel => Groups.RemoveFromGroupAsync(Context.ConnectionId, channel)));
+        var userChannels = await dbContext.Members.AsNoTracking().Where(m => m.UserId == user.UserId).ToArrayAsync();
+        await Task.WhenAll(userChannels.Select(channel => Groups.RemoveFromGroupAsync(Context.ConnectionId, channel.ChannelId)));
 
         // Notify users in the same groups about user leaving
         var connections = connectionManager.GetConnections(user.UserId);
@@ -54,7 +57,10 @@ internal sealed class ChatHub(
 
     public async Task SendChannelMessage(string channelId, string contentType, byte[] content)
     {
-        var message = new ChannelMessage(channelId, Context.User.GetUserIdentity(), contentType, content);
+        var channel = await dbContext.FindAsync<Channel>(channelId) ??
+            throw new HubException($"Channel with ID '{channelId}' does not exist.");
+
+        var message = new ChannelMessage(channel.ToIdentity(), Context.User.GetUserIdentity(), contentType, content);
 
         // Send message to all clients in the group.
         await Clients.Group(channelId).OnMessage(message);

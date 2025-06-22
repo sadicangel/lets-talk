@@ -1,21 +1,16 @@
 <Solution>
-  <Folder Name="/LetsTalk.ChannelService/">
-    <Project Path="src/LetsTalk.ChannelService/LetsTalk.ChannelService.DbMigration/LetsTalk.ChannelService.DbMigration.csproj" Id="f5b555af-7950-4726-b18a-29ad49366533" />
-    <Project Path="src/LetsTalk.ChannelService/LetsTalk.ChannelService.WebApi/LetsTalk.ChannelService.WebApi.csproj" Id="a6a94968-f5a0-4170-9681-ee0ba22382e6" />
-  </Folder>
   <Folder Name="/LetsTalk.ChatClient/">
     <Project Path="src/LetsTalk.ChatClient/LetsTalk.ChatClient.Console/LetsTalk.ChatClient.Console.csproj" Id="a92805da-8d74-48e4-8a3c-c6c7e64c6bd2" />
   </Folder>
   <Folder Name="/LetsTalk.ChatService/">
+    <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.DbMigration/LetsTalk.ChatService.DbMigration.csproj" Id="bc17ecfd-bd07-4ce9-8cbf-229cb93deb6b" />
+    <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.Domain/LetsTalk.ChatService.Domain.csproj" Id="1ee724ee-6fd9-451b-8c16-9187b61925b7" />
     <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.WebApi/LetsTalk.ChatService.WebApi.csproj" />
   </Folder>
   <Folder Name="/LetsTalk.IdentityService/">
     <Project Path="src/LetsTalk.IdentityService/LetsTalk.IdentityService.DbMigration/LetsTalk.IdentityService.DbMigration.csproj" Id="e7e38ff0-d265-4349-a1a5-d6289935ac92" />
     <Project Path="src/LetsTalk.IdentityService/LetsTalk.IdentityService.WebApi/LetsTalk.IdentityService.WebApi.csproj" Id="726825d0-c2b0-43b1-a577-09cbc27e3356" />
   </Folder>
-  <Project Path="src/LetsTalk.AppHost/LetsTalk.AppHost.csproj" />
-  <Project Path="src/LetsTalk.ServiceDefaults/LetsTalk.ServiceDefaults.csproj" />
-  <Project Path="src/LetsTalk.Shared/LetsTalk.Shared.csproj" Id="a1231816-ed61-41c1-b173-bad3d7ba6dc3" />
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitattributes" />
@@ -26,4 +21,7 @@
     <File Path="README.md" />
     <File Path="SpellingExclusions.dic" />
   </Folder>
+  <Project Path="src/LetsTalk.AppHost/LetsTalk.AppHost.csproj" />
+  <Project Path="src/LetsTalk.ServiceDefaults/LetsTalk.ServiceDefaults.csproj" />
+  <Project Path="src/LetsTalk.Shared/LetsTalk.Shared.csproj" Id="a1231816-ed61-41c1-b173-bad3d7ba6dc3" />
 </Solution>
