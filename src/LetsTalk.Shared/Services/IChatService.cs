@@ -3,6 +3,10 @@
 namespace LetsTalk.Shared.Services;
 public interface IChatService
 {
+    [Post("/api/system/notification")]
+    [Headers("Authorization: Bearer")]
+    public Task SendNotification([Body] NotificationRequest request, CancellationToken cancellationToken = default);
+
     [Get("/api/channels")]
     [Headers("Authorization: Bearer")]
     public Task<ChannelListResponse> GetChannels(string? userId = null, CancellationToken cancellationToken = default);
@@ -23,6 +27,8 @@ public interface IChatService
     [Headers("Authorization: Bearer")]
     public Task DeleteChannel(string channelId, CancellationToken cancellationToken = default);
 }
+
+public sealed record class NotificationRequest(string ContentType, byte[] Content);
 
 public sealed record class ChannelListResponse(string[] Channels);
 public sealed record class ChannelResponse(string ChannelId, string ChannelName, string? Description, List<string> Members);

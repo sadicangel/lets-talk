@@ -1,18 +1,32 @@
-﻿using LetsTalk.Shared.Events;
+﻿using LetsTalk.ChatClient.Console.Services;
 using LetsTalk.Shared.Services;
-using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Refit;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddSingleton<CredentialsCache>();
 builder.Services.AddHttpClient();
+
+builder.Services.AddSingleton<CredentialsCache>()
+    .Configure<CredentialsCacheOptions>(builder.Configuration.GetRequiredSection(CredentialsCacheOptions.SectionName));
+
+builder.Services.AddSingleton<HubConnection>(provider => new HubConnectionBuilder()
+    .WithUrl("https+http://letstalk-chat-service-webapi/chat", options =>
+    {
+        options.AccessTokenProvider = () => provider.GetRequiredService<CredentialsCache>().GetBearerTokenAsync(CancellationToken.None)!;
+        options.HttpMessageHandlerFactory = _ => provider.GetRequiredService<IHttpMessageHandlerFactory>().CreateHandler();
+    })
+    .WithAutomaticReconnect()
+    .Build());
+
+builder.Services.AddSingleton<LetsTalkClient, LoggingLetsTalkClient>();
 
 builder.Services.AddRefitClient<IIdentityService>()
     .ConfigureHttpClient(http => http.BaseAddress = new Uri("https+http://letstalk-identity-service-webapi"));
@@ -27,8 +41,9 @@ var app = builder.Build();
 // Ensure registered
 try
 {
+    var options = app.Services.GetRequiredService<IOptions<CredentialsCacheOptions>>().Value;
     await app.Services.GetRequiredService<IIdentityService>()
-        .RegisterAsync(new RegisterRequest(CredentialsCache.Username, CredentialsCache.Password, CredentialsCache.Email));
+        .RegisterAsync(new RegisterRequest(options.Username, options.Password, options.Email));
 }
 catch (ValidationApiException)
 {
@@ -40,39 +55,20 @@ var logger = app.Services.GetRequiredService<ILogger<Program>>();
 // Ensure chats exist.
 var chatService = app.Services.GetRequiredService<IChatService>();
 var response = await chatService.GetChannels();
-if (response.Channels.Length == 0)
+var channelId = response.Channels.FirstOrDefault();
+if (channelId is null)
 {
-    await chatService.CreateChannel(new ChannelRequest("General", "General chat"));
+    var channel = await chatService.CreateChannel(new ChannelRequest("General", "General chat"));
+    channelId = channel.ChannelId;
 }
 
-var connection = new HubConnectionBuilder()
-    .WithUrl("https+http://letstalk-chat-service-webapi/chat", options =>
-    {
-        options.AccessTokenProvider = () => app.Services.GetRequiredService<CredentialsCache>().GetBearerTokenAsync(CancellationToken.None)!;
-        options.HttpMessageHandlerFactory = _ => app.Services.GetRequiredService<IHttpMessageHandlerFactory>().CreateHandler();
-    })
-    .WithAutomaticReconnect()
-    .Build();
 
-connection.On<ChannelMessage>("OnMessage", message =>
-{
-    logger.LogInformation("[Message] (from {@UserName}): {@Message}", message.Author.UserName, System.Text.Encoding.UTF8.GetString(message.Content));
-});
-
-connection.On<UserConnected>("OnUserConnected", message =>
-{
-    logger.LogInformation("[User Connected] {@UserName} (Total online: {@OnlineUsers})", message.ConnectingUser.UserName, message.OnlineUsers.Count());
-});
-
-connection.On<UserDisconnected>("OnUserDisconnected", message =>
-{
-    logger.LogInformation("[User Disconnected] {@UserName} (Total online: {@OnlineUsers})", message.DisconnectingUser.UserName, message.OnlineUsers.Count());
-});
+var client = app.Services.GetRequiredService<LetsTalkClient>();
 
 try
 {
     logger.LogInformation("Connecting...");
-    await connection.StartAsync();
+    await client.ConnectAsync();
     logger.LogInformation("Connected!");
 
     // Simple loop to send messages
@@ -83,41 +79,10 @@ try
     //    logger.Write("Enter message: ");
     //    var msg = logger.ReadLine()!;
 
-    var content = System.Text.Encoding.UTF8.GetBytes("Test message");
-    await connection.InvokeAsync("SendChannelMessage", "1", "text/plain", content);
+    await client.SendChannelMessage(channelId, contentType: "text/plain", content: System.Text.Encoding.UTF8.GetBytes("Test message"));
     //}
 }
 catch (Exception ex)
 {
     logger.LogError(ex, "Connection failed");
-}
-
-sealed class CredentialsCache(IServiceProvider serviceProvider)
-{
-    public const string Username = "test";
-    public const string Password = "Test1234!";
-    public const string Email = "test@letstalk.com";
-
-    private AccessTokenResponse? _response;
-    private DateTimeOffset _expires;
-
-    public async Task<string> GetBearerTokenAsync(CancellationToken cancellationToken)
-    {
-        if (_response is null)
-        {
-            _response = await serviceProvider.GetRequiredService<IIdentityService>()
-                .LoginAsync(new LoginRequest(Username, Password), cancellationToken);
-            _expires = DateTimeOffset.UtcNow.AddSeconds(_response.ExpiresIn - 30);
-        }
-        else if (_expires <= DateTimeOffset.UtcNow)
-        {
-            _response = await serviceProvider.GetRequiredService<IIdentityService>()
-                .RefreshAsync(new RefreshRequest(_response.RefreshToken), cancellationToken);
-            _expires = DateTimeOffset.UtcNow.AddSeconds(_response.ExpiresIn - 30);
-
-            return _response.AccessToken;
-        }
-
-        return _response.AccessToken;
-    }
 }

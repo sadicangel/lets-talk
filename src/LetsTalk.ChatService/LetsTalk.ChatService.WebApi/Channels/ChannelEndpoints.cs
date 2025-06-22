@@ -15,16 +15,16 @@ public static class ChannelEndpoints
 {
     public static IEndpointConventionBuilder MapChannelEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var api = endpoints.MapGroup("api");
+        var api = endpoints.MapGroup("api/channels");
 
-        api.MapGet("/channels", GetChannels);
-        api.MapGet("/channels/{channelId}", GetChannel);
-        api.MapPost("/channels", CreateChannel);
-        api.MapPut("/channels/{channelId}", UpdateChannel);
-        api.MapDelete("/channels/{channelId}", DeleteChannel);
+        api.MapGet("/", GetChannels);
+        api.MapGet("/{channelId}", GetChannel);
+        api.MapPost("/", CreateChannel);
+        api.MapPut("/{channelId}", UpdateChannel);
+        api.MapDelete("/{channelId}", DeleteChannel);
 
-        api.MapGet("/channels/{channelId}/join", JoinChannel);
-        api.MapGet("/channels/{channelId}/leave", LeaveChannel);
+        api.MapGet("/{channelId}/join", JoinChannel);
+        api.MapGet("/{channelId}/leave", LeaveChannel);
 
         return api;
     }

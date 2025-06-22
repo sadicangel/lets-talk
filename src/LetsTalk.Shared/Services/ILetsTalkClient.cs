@@ -1,11 +1,11 @@
 ﻿using LetsTalk.Shared.Events;
 
-namespace LetsTalk.Shared;
+namespace LetsTalk.Shared.Services;
 
 public interface ILetsTalkClient
 {
     Task OnMessage(ChannelMessage @event);
-    //Task OnNotification(NotificationEvent @event);
+    Task OnNotification(ServerNotification @event);
 
     Task OnUserConnected(UserConnected @event);
     Task OnUserDisconnected(UserDisconnected @event);

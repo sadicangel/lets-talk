@@ -2,6 +2,7 @@
 using LetsTalk.ChatService.Domain.Entities;
 using LetsTalk.Shared;
 using LetsTalk.Shared.Events;
+using LetsTalk.Shared.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
