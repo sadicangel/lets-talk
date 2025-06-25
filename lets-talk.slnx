@@ -5,6 +5,7 @@
   <Folder Name="/LetsTalk.ChatService/">
     <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.DbMigration/LetsTalk.ChatService.DbMigration.csproj" Id="bc17ecfd-bd07-4ce9-8cbf-229cb93deb6b" />
     <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.Domain/LetsTalk.ChatService.Domain.csproj" Id="1ee724ee-6fd9-451b-8c16-9187b61925b7" />
+    <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.MessageConsumer/LetsTalk.ChatService.MessageConsumer.csproj" Id="ea92341f-c165-4acc-8ccc-50b25af87d5a" />
     <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.WebApi/LetsTalk.ChatService.WebApi.csproj" />
   </Folder>
   <Folder Name="/LetsTalk.IdentityService/">

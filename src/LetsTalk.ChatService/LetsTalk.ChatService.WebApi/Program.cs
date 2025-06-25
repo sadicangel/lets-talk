@@ -14,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+builder.AddMassTransitRabbitMq("letstalk-rabbitmq");
+
 builder.AddNpgsqlDbContext<ChatDbContext>("letstalk-chat-service-db");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

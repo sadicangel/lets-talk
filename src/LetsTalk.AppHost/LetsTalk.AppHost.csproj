@@ -11,11 +11,13 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LetsTalk.ChatClient\LetsTalk.ChatClient.Console\LetsTalk.ChatClient.Console.csproj" />
     <ProjectReference Include="..\LetsTalk.ChatService\LetsTalk.ChatService.DbMigration\LetsTalk.ChatService.DbMigration.csproj" />
+    <ProjectReference Include="..\LetsTalk.ChatService\LetsTalk.ChatService.MessageConsumer\LetsTalk.ChatService.MessageConsumer.csproj" />
     <ProjectReference Include="..\LetsTalk.ChatService\LetsTalk.ChatService.WebApi\LetsTalk.ChatService.WebApi.csproj" />
     <ProjectReference Include="..\LetsTalk.IdentityService\LetsTalk.IdentityService.DbMigration\LetsTalk.IdentityService.DbMigration.csproj" />
     <ProjectReference Include="..\LetsTalk.IdentityService\LetsTalk.IdentityService.WebApi\LetsTalk.IdentityService.WebApi.csproj" />
