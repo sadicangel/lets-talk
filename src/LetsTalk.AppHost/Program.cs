@@ -4,6 +4,12 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var securityKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
 
+var rabbitmqUsername = builder.AddParameter("username", "guest");
+var rabbitmqPassword = builder.AddParameter("password", "guest");
+
+var rabbitmq = builder.AddRabbitMQ("letstalk-rabbitmq", rabbitmqUsername, rabbitmqPassword)
+    .WithManagementPlugin();
+
 var postgres = builder.AddPostgres("letstalk-postgres")
     .WithDataVolume()
     .WithPgWeb();
@@ -25,9 +31,19 @@ var chatDbMigration = builder.AddProject<Projects.LetsTalk_ChatService_DbMigrati
 var chatService = builder.AddProject<Projects.LetsTalk_ChatService_WebApi>("letstalk-chat-service-webapi")
     .WithOpenApiReference()
     .WithEnvironment("Jwt__SecurityKey", securityKey)
+    .WithReference(rabbitmq)
     .WithReference(chatDatabase)
-    .WithReference(chatDbMigration)
-    .WithReference(identityService);
+    .WithReference(identityService)
+    .WaitFor(rabbitmq)
+    .WaitFor(chatDatabase)
+    .WaitFor(chatDbMigration)
+    .WaitFor(identityService);
+builder.AddProject<Projects.LetsTalk_ChatService_MessageConsumer>("letstalk-chat-service-message-consumer")
+    .WithReference(rabbitmq)
+    .WithReference(chatDatabase)
+    .WaitFor(rabbitmq)
+    .WaitFor(chatDatabase)
+    .WaitFor(chatDbMigration);
 
 builder.AddProject<Projects.LetsTalk_ChatClient_Console>("letstalk-chat-client-console")
     .WithReference(identityService)

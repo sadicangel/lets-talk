@@ -4,8 +4,8 @@ namespace LetsTalk.Shared.Services;
 
 public interface ILetsTalkClient
 {
-    Task OnMessage(ChannelMessage @event);
-    Task OnNotification(ServerNotification @event);
+    Task OnMessage(Message @event);
+    Task OnNotification(Notification @event);
 
     Task OnUserConnected(UserConnected @event);
     Task OnUserDisconnected(UserDisconnected @event);

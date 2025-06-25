@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LetsTalk.ChatService.DbMigration.Migrations
 {
     [DbContext(typeof(ChatDbContext))]
-    [Migration("20250622220904_InitialChatSchema")]
+    [Migration("20250625223457_InitialChatSchema")]
     partial class InitialChatSchema
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace LetsTalk.ChatService.DbMigration.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -37,6 +37,12 @@ namespace LetsTalk.ChatService.DbMigration.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Id");
 
@@ -68,9 +74,53 @@ namespace LetsTalk.ChatService.DbMigration.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("ChannelId", "UserId");
 
                     b.ToTable("Members");
+                });
+
+            modelBuilder.Entity("LetsTalk.ChatService.Domain.Entities.ChannelMessage", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<string>("AuthorId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ChannelId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("LetsTalk.ChatService.Domain.Entities.ChannelMember", b =>
@@ -84,9 +134,22 @@ namespace LetsTalk.ChatService.DbMigration.Migrations
                     b.Navigation("Channel");
                 });
 
+            modelBuilder.Entity("LetsTalk.ChatService.Domain.Entities.ChannelMessage", b =>
+                {
+                    b.HasOne("LetsTalk.ChatService.Domain.Entities.Channel", "Channel")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Channel");
+                });
+
             modelBuilder.Entity("LetsTalk.ChatService.Domain.Entities.Channel", b =>
                 {
                     b.Navigation("Members");
+
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

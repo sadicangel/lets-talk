@@ -3,6 +3,7 @@ using LetsTalk.ChatService.Domain.Entities;
 using LetsTalk.Shared;
 using LetsTalk.Shared.Events;
 using LetsTalk.Shared.Services;
+using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ namespace LetsTalk.ChatService.WebApi.Hubs;
 public sealed class ChatHub(
     ConnectionManager connectionManager,
     ChatDbContext dbContext,
+    IPublishEndpoint publishEndpoint,
     ILogger<ChatHub> logger)
     : Hub<ILetsTalkClient>
 {
@@ -61,13 +63,13 @@ public sealed class ChatHub(
         var channel = await dbContext.FindAsync<Channel>(channelId) ??
             throw new HubException($"Channel with ID '{channelId}' does not exist.");
 
-        var message = new ChannelMessage(channel.ToIdentity(), Context.User.GetUserIdentity(), contentType, content);
+        var message = new Message(channel.ToIdentity(), Context.User.GetUserIdentity(), contentType, content);
 
         // Send message to all clients in the group.
         await Clients.Group(channelId).OnMessage(message);
 
         logger.LogInformation("User {UserId} sent message to channel {ChannelId}: {@Message}", Context.User.GetUserId(), channelId, message);
 
-        // Send message to queue so that message can be persisted in the database.
+        await publishEndpoint.Publish(message);
     }
 }

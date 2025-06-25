@@ -19,7 +19,7 @@ public static class SystemEndpoints
 
     private static async Task<Ok> SendNotification(NotificationRequest request, IHubContext<ChatHub, ILetsTalkClient> hubContext)
     {
-        await hubContext.Clients.All.OnNotification(new ServerNotification(request.ContentType, request.Content));
+        await hubContext.Clients.All.OnNotification(new Notification(request.ContentType, request.Content));
 
         return TypedResults.Ok();
     }

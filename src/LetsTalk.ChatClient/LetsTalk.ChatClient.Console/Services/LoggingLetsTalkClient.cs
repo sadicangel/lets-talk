@@ -20,14 +20,14 @@ public sealed class LoggingLetsTalkClient(HubConnection connection, ILogger<Logg
         return Task.CompletedTask;
     }
 
-    public override Task OnMessage(ChannelMessage @event)
+    public override Task OnMessage(Message @event)
     {
         logger.LogInformation("[Message] (from {@UserName}): {@Message}", @event.Author.UserName, System.Text.Encoding.UTF8.GetString(@event.Content));
 
         return Task.CompletedTask;
     }
 
-    public override Task OnNotification(ServerNotification @event)
+    public override Task OnNotification(Notification @event)
     {
         logger.LogInformation("[Notification]: {@Message}", System.Text.Encoding.UTF8.GetString(@event.Content));
 

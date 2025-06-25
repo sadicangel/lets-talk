@@ -10,8 +10,8 @@ public abstract class LetsTalkClient : ILetsTalkClient, IAsyncDisposable
     protected LetsTalkClient(HubConnection connection)
     {
         _connection = connection ?? throw new ArgumentNullException(nameof(connection));
-        _connection.On<ChannelMessage>(nameof(OnMessage), OnMessage);
-        _connection.On<ServerNotification>(nameof(OnNotification), OnNotification);
+        _connection.On<Message>(nameof(OnMessage), OnMessage);
+        _connection.On<Notification>(nameof(OnNotification), OnNotification);
         _connection.On<UserConnected>(nameof(OnUserConnected), OnUserConnected);
         _connection.On<UserDisconnected>(nameof(OnUserDisconnected), OnUserDisconnected);
         _connection.On<ChannelMemberJoined>(nameof(OnChannelMemberJoined), OnChannelMemberJoined);
@@ -32,8 +32,8 @@ public abstract class LetsTalkClient : ILetsTalkClient, IAsyncDisposable
     protected virtual async ValueTask DisposeAsyncCore() =>
         await _connection.DisposeAsync().ConfigureAwait(false);
 
-    public abstract Task OnMessage(ChannelMessage @event);
-    public abstract Task OnNotification(ServerNotification @event);
+    public abstract Task OnMessage(Message @event);
+    public abstract Task OnNotification(Notification @event);
     public abstract Task OnUserConnected(UserConnected @event);
     public abstract Task OnUserDisconnected(UserDisconnected @event);
     public abstract Task OnChannelMemberJoined(ChannelMemberJoined @event);

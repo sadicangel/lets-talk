@@ -1,5 +1,6 @@
 ﻿namespace LetsTalk.Shared.Events;
-public sealed record class ChannelMessage(
+
+public sealed record class Message(
     ChannelIdentity Channel,
     UserIdentity Author,
     string ContentType,
