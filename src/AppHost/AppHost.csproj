@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="13.0.0" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>58a51fff-e457-470c-b77b-0c4105db4f56</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Apps\Cli\Cli.csproj" AspireProjectMetadataTypeName="CliApp" />
+    <ProjectReference Include="..\Chat\DbMigration\DbMigration.csproj" AspireProjectMetadataTypeName="ChatDbMigration" />
+    <ProjectReference Include="..\Chat\WebApi\WebApi.csproj" AspireProjectMetadataTypeName="ChatWebApi" />
+    <ProjectReference Include="..\Identity\DbMigration\DbMigration.csproj" AspireProjectMetadataTypeName="IdentityDbMigration" />
+    <ProjectReference Include="..\Identity\WebApi\WebApi.csproj" AspireProjectMetadataTypeName="IdentityWebApi" />
+  </ItemGroup>
+
+</Project>
