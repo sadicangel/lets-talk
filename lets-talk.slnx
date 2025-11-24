@@ -1,28 +1,30 @@
 <Solution>
-  <Folder Name="/LetsTalk.ChatClient/">
-    <Project Path="src/LetsTalk.ChatClient/LetsTalk.ChatClient.Console/LetsTalk.ChatClient.Console.csproj" Id="a92805da-8d74-48e4-8a3c-c6c7e64c6bd2" />
-  </Folder>
-  <Folder Name="/LetsTalk.ChatService/">
-    <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.DbMigration/LetsTalk.ChatService.DbMigration.csproj" Id="bc17ecfd-bd07-4ce9-8cbf-229cb93deb6b" />
-    <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.Domain/LetsTalk.ChatService.Domain.csproj" Id="1ee724ee-6fd9-451b-8c16-9187b61925b7" />
-    <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.MessageConsumer/LetsTalk.ChatService.MessageConsumer.csproj" Id="ea92341f-c165-4acc-8ccc-50b25af87d5a" />
-    <Project Path="src/LetsTalk.ChatService/LetsTalk.ChatService.WebApi/LetsTalk.ChatService.WebApi.csproj" />
-  </Folder>
-  <Folder Name="/LetsTalk.IdentityService/">
-    <Project Path="src/LetsTalk.IdentityService/LetsTalk.IdentityService.DbMigration/LetsTalk.IdentityService.DbMigration.csproj" Id="e7e38ff0-d265-4349-a1a5-d6289935ac92" />
-    <Project Path="src/LetsTalk.IdentityService/LetsTalk.IdentityService.WebApi/LetsTalk.IdentityService.WebApi.csproj" Id="726825d0-c2b0-43b1-a577-09cbc27e3356" />
-  </Folder>
-  <Folder Name="/Solution Items/">
+  <Folder Name="/_Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
-    <File Path="LICENSE" />
-    <File Path="README.md" />
     <File Path="SpellingExclusions.dic" />
   </Folder>
-  <Project Path="src/LetsTalk.AppHost/LetsTalk.AppHost.csproj" />
-  <Project Path="src/LetsTalk.ServiceDefaults/LetsTalk.ServiceDefaults.csproj" />
-  <Project Path="src/LetsTalk.Shared/LetsTalk.Shared.csproj" Id="a1231816-ed61-41c1-b173-bad3d7ba6dc3" />
+  <Folder Name="/Apps/Cli/">
+    <Project Path="src/Apps/Cli/Cli.csproj" />
+  </Folder>
+  <Folder Name="/Chat/">
+    <File Path="src/Chat/Add-Migration.ps1" />
+    <File Path="src/Chat/Directory.Build.props" />
+    <Project Path="src/Chat/DbMigration/DbMigration.csproj" Id="557e521e-837b-47b0-87e5-3495da5718ce" />
+    <Project Path="src/Chat/Domain/Domain.csproj" Id="8eb0d0a9-5059-4a69-b397-0fa7ef4b9b19" />
+    <Project Path="src/Chat/WebApi/WebApi.csproj" />
+  </Folder>
+  <Folder Name="/Identity/">
+    <File Path="src/Identity/Add-Migration.ps1" />
+    <File Path="src/Identity/Directory.Build.props" />
+    <Project Path="src/Identity/DbMigration/DbMigration.csproj" Id="9a72b132-85cd-4180-ad5e-524e61183b15" />
+    <Project Path="src/Identity/Domain/Domain.csproj" Id="70caa809-2c17-4809-acac-77dffc53d606" />
+    <Project Path="src/Identity/WebApi/WebApi.csproj" />
+  </Folder>
+  <Project Path="src/AppHost/AppHost.csproj" Id="98916e62-1398-4cc0-80c5-6d0695e952f0" />
+  <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
+  <Project Path="src/Shared/Shared.csproj" Id="1cbb02dc-1736-436a-8e24-6ca87c347e27" />
 </Solution>
