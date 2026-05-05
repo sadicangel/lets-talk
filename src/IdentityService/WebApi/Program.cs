@@ -14,8 +14,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<JwtBearerTokenProvider>();
-builder.Services.Configure<JwtBearerTokenProviderOptions>(builder.Configuration.GetSection("LetsTalk:Jwt"))
-    .AddOptionsWithValidateOnStart<JwtBearerTokenProviderOptions>();
 
 builder.Services.AddOpenApi();
 

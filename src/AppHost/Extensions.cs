@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
-using System.Security.Cryptography;
+using System.Linq.Expressions;
+using System.Text;
+using LetsTalk.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace LetsTalk;
@@ -11,7 +13,7 @@ internal static class Extensions
         public IResourceBuilder<PostgresServerResource> AddPostgres()
         {
             var username = builder.AddParameter("postgres-username", "postgres");
-            var password = builder.AddParameter("postgres-password", Convert.ToBase64String(RandomNumberGenerator.GetBytes(12)), secret: true);
+            var password = builder.AddParameter("postgres-password", PasswordGenerator.Generate(12), secret: true);
 
             return builder.AddPostgres("postgres", username, password).WithPgAdmin();
         }
@@ -27,7 +29,7 @@ internal static class Extensions
 
             return builder.AddProject<Projects.IdentityWebApi>("identity-webapi")
                 .WithOpenApiReference()
-                .WithEnvironment("LetsTalk__Jwt__SecurityKey", securityKey)
+                .WithEnvironment(LetsTalkJwtOptions.GetEnvironmentVariableName(x => x.SecurityKey), securityKey)
                 .WithReference(database)
                 .WaitFor(dbMigration);
         }
@@ -43,7 +45,7 @@ internal static class Extensions
 
             return builder.AddProject<Projects.ChatWebApi>("chat-webapi")
                 .WithOpenApiReference()
-                .WithEnvironment("LetsTalk__Jwt__SecurityKey", securityKey)
+                .WithEnvironment(LetsTalkJwtOptions.GetEnvironmentVariableName(x => x.SecurityKey), securityKey)
                 .WithReference(database)
                 .WaitFor(dbMigration);
         }
@@ -51,19 +53,17 @@ internal static class Extensions
         public IResourceBuilder<ProjectResource> AddCliApp(IResourceBuilder<ProjectResource> identityService, IResourceBuilder<ProjectResource> chatService)
         {
             var username = builder.AddParameter("cli-username", "ShadySardine");
-            var password = builder.AddParameter("cli-password", Convert.ToBase64String(RandomNumberGenerator.GetBytes(12)), secret: true);
+            var password = builder.AddParameter("cli-password", PasswordGenerator.Generate(12), secret: true);
 
             return builder.AddProject<Projects.CliApp>("cli-app")
                 .WithExplicitStart()
                 .ExcludeFromManifest()
-                .WithEnvironment("LetsTalk__Credentials__UserName", username)
-                .WithEnvironment("LetsTalk__Credentials__Password", password)
-                .WithReference(identityService)
-                .WithEnvironment("LetsTalk__IdentityApi__Url", $"https+http://{identityService.Resource.Name}")
-                .WithReference(chatService)
-                .WithEnvironment("LetsTalk__ChatApi__Url", $"https+http://{chatService.Resource.Name}")
-                .WithReference(chatService)
-                .WithEnvironment("LetsTalk__ChatHub__Url", $"https+http://{chatService.Resource.Name}/hub");
+                .WithEnvironment(CredentialsCacheOptions.GetEnvironmentVariableName(x => x.Username), username)
+                .WithEnvironment(CredentialsCacheOptions.GetEnvironmentVariableName(x => x.Password), password)
+                .WaitFor(identityService)
+                .WithEnvironment(IdentityApiOptions.GetEnvironmentVariableName(x => x.Url), identityService.GetEndpoint("https"))
+                .WaitFor(chatService)
+                .WithEnvironment(ChatApiOptions.GetEnvironmentVariableName(x => x.Url), chatService.GetEndpoint("https"));
         }
     }
 
@@ -74,7 +74,7 @@ internal static class Extensions
             return builder.WithCommand(
                 "scalar-api-reference",
                 "Scalar API Reference",
-                context =>
+                _ =>
                 {
                     try
                     {
@@ -100,5 +100,34 @@ internal static class Extensions
                     UpdateState = context => context.ResourceSnapshot.HealthStatus is HealthStatus.Healthy ? ResourceCommandState.Enabled : ResourceCommandState.Disabled,
                 });
         }
+    }
+}
+
+file static class LetsTalkOptionsExtensions
+{
+    extension<TOptions>(TOptions) where TOptions : ILetsTalkOptions
+    {
+        public static string GetEnvironmentVariableName<TProperty>(Expression<Func<TOptions, TProperty>> expression) =>
+            GetEnvironmentVariableName(TOptions.SectionName, expression);
+    }
+
+    extension<T>(T)
+    {
+        private static string GetEnvironmentVariableName<TProperty>(string sectionName, Expression<Func<T, TProperty>> expression) =>
+            GetFullPath(sectionName, expression);
+    }
+
+    private static string GetFullPath<T, TProperty>(string sectionName, Expression<Func<T, TProperty>> expression)
+    {
+        var builder = new StringBuilder(sectionName).Replace(":", "__");
+        var current = expression.Body;
+
+        while (current is MemberExpression member)
+        {
+            builder.Append($"__{member.Member.Name}");
+            current = member.Expression;
+        }
+
+        return builder.ToString();
     }
 }

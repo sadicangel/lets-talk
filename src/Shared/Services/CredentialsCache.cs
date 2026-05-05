@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.BearerToken;
+﻿using LetsTalk.Configuration;
+using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.Extensions.Options;
 
 namespace LetsTalk.Services;

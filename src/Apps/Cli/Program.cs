@@ -1,4 +1,5 @@
-﻿using LetsTalk.Services;
+﻿using LetsTalk.Configuration;
+using LetsTalk.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,8 +11,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.AddServiceDefaults();
 builder.Services.AddHttpClient();
 builder.Services.AddIdentityApiClient(builder.Configuration);
-builder.Services.AddChatApiClient(builder.Configuration);
-builder.Services.AddChatHubClient<ChatHubClient>(builder.Configuration);
+builder.Services.AddChatApiClient<ChatHubClient>(builder.Configuration);
 
 var app = builder.Build();
 

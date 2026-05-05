@@ -1,5 +1,7 @@
-﻿using LetsTalk.Services;
+﻿using LetsTalk.Configuration;
+using LetsTalk.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -36,35 +38,32 @@ public static class LetsTalkExtensions
             return services;
         }
 
-        public IServiceCollection AddChatApiClient(IConfiguration configuration)
+        public IServiceCollection AddChatApiClient<TChatHub>(IConfiguration configuration)
+            where TChatHub : ChatHubClient
         {
             services.AddCredentialsCache(configuration);
             services.Configure<ChatApiOptions>(configuration.GetRequiredSection(ChatApiOptions.SectionName));
             services.AddRefitClient<IChatApi>(services => new RefitSettings { AuthorizationHeaderValueGetter = (_, ct) => services.GetRequiredService<CredentialsCache>().GetBearerTokenAsync(ct) })
                 .ConfigureHttpClient((provider, http) => http.BaseAddress = new Uri(provider.GetRequiredService<IOptions<ChatApiOptions>>().Value.Url));
-            return services;
-        }
-
-        public IServiceCollection AddChatHubClient<TChatHub>(IConfiguration configuration, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
-            where TChatHub : ChatHubClient
-        {
-            services.AddCredentialsCache(configuration);
-            services.Configure<ChatHubOptions>(configuration.GetRequiredSection(ChatHubOptions.SectionName));
             services.Add(
                 new ServiceDescriptor(
                     serviceType: typeof(HubConnection),
-                    factory: provider => new HubConnectionBuilder()
-                        .WithUrl(
-                            provider.GetRequiredService<IOptions<ChatHubOptions>>().Value.Url,
-                            options =>
-                            {
-                                options.AccessTokenProvider = () => provider.GetRequiredService<CredentialsCache>().GetBearerTokenAsync(CancellationToken.None)!;
-                                options.HttpMessageHandlerFactory = _ => provider.GetRequiredService<IHttpMessageHandlerFactory>().CreateHandler();
-                            })
-                        .WithAutomaticReconnect()
-                        .Build(),
-                    lifetime: serviceLifetime));
-            services.Add(new ServiceDescriptor(typeof(ChatHubClient), typeof(TChatHub), serviceLifetime));
+                    factory: provider =>
+                    {
+                        var chatApi = provider.GetRequiredService<IOptions<ChatApiOptions>>().Value;
+                        return new HubConnectionBuilder()
+                            .WithUrl(
+                                new Uri(chatApi.Url) + chatApi.HubName,
+                                options =>
+                                {
+                                    options.AccessTokenProvider = () => provider.GetRequiredService<CredentialsCache>().GetBearerTokenAsync(CancellationToken.None)!;
+                                    options.HttpMessageHandlerFactory = _ => provider.GetRequiredService<IHttpMessageHandlerFactory>().CreateHandler();
+                                })
+                            .WithAutomaticReconnect()
+                            .Build();
+                    },
+                    lifetime: ServiceLifetime.Transient));
+            services.Add(new ServiceDescriptor(typeof(ChatHubClient), typeof(TChatHub), ServiceLifetime.Transient));
             return services;
         }
     }
@@ -73,26 +72,24 @@ public static class LetsTalkExtensions
     {
         public AuthenticationBuilder AddLetsTalkJwtBearer(IConfiguration configuration)
         {
-            const string SectionPath = "LetsTalk:Jwt";
-            var options = configuration.GetRequiredSection(SectionPath).Get<LetsTalkJwtOptions>()
-                ?? throw new InvalidOperationException($"Missing config section '{SectionPath}'");
-
-            return builder.AddJwtBearer(x =>
-            {
-                x.MapInboundClaims = false;
-                x.TokenValidationParameters = new TokenValidationParameters
+            builder.Services.Configure<LetsTalkJwtOptions>(configuration.GetRequiredSection(LetsTalkJwtOptions.SectionName));
+            builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+                .Configure<IOptions<LetsTalkJwtOptions>>((bearerOptions, sectionOptions) =>
                 {
-                    ValidateIssuer = true,
-                    ValidIssuer = options.Issuer,
-                    ValidateAudience = false,
-                    ValidAudience = options.Audience,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(options.SecurityKey)),
-                };
-            });
+                    bearerOptions.MapInboundClaims = false;
+                    bearerOptions.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = sectionOptions.Value.Issuer,
+                        ValidateAudience = false,
+                        ValidAudience = sectionOptions.Value.Audience,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Base64UrlEncoder.DecodeBytes(sectionOptions.Value.SecurityKey)),
+                    };
+                });
+
+            return builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme);
         }
     }
-
-    private sealed record class LetsTalkJwtOptions(string Issuer, string Audience, string SecurityKey);
 }
