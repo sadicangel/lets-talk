@@ -20,14 +20,18 @@ public static class ProfileEndpoints
     }
 
 
-    private static Results<Ok<UserProfileResponse>, UnauthorizedHttpResult> GetProfile(ClaimsPrincipal principal)
+    private static async Task<Results<Ok<UserProfileResponse>, UnauthorizedHttpResult, NotFound>> GetProfile(ClaimsPrincipal principal, UserManager<AppUser> userManager)
     {
         if (principal.Identity?.IsAuthenticated is not true)
             return TypedResults.Unauthorized();
 
-        var user = principal.UserIdentity;
+        var user = await userManager.FindByIdAsync(principal.UserId);
+        if (user is null)
+        {
+            return TypedResults.NotFound();
+        }
 
-        return TypedResults.Ok(new UserProfileResponse(user.UserId, user.UserName, user.Email, user.AvatarUrl));
+        return TypedResults.Ok(new UserProfileResponse(user.Id, user.UserName!, user.Email!, user.AvatarUrl));
     }
 
     private static async Task<Results<Ok<UserProfileResponse>, UnauthorizedHttpResult, NotFound, BadRequest>> UpdateProfile(UserProfileRequest request, ClaimsPrincipal principal, UserManager<AppUser> userManager)
@@ -46,9 +50,19 @@ public static class ProfileEndpoints
             return TypedResults.BadRequest();
         }
 
-        user.Email = request.Email;
-        user.AvatarUrl = request.AvatarUrl;
+        var emailResult = await userManager.SetEmailAsync(user, request.Email);
+        if (!emailResult.Succeeded)
+        {
+            return TypedResults.BadRequest();
+        }
 
-        return TypedResults.Ok(new UserProfileResponse(user.Id, user.UserName!, user.Email, user.AvatarUrl));
+        user.AvatarUrl = request.AvatarUrl;
+        var updateResult = await userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            return TypedResults.BadRequest();
+        }
+
+        return TypedResults.Ok(new UserProfileResponse(user.Id, user.UserName!, user.Email!, user.AvatarUrl));
     }
 }

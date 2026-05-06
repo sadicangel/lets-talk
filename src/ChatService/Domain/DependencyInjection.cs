@@ -14,7 +14,8 @@ public static class DependencyInjection
         services
             .AddSingleton(TimeProvider.System)
             .AddDbContextPool<ChatDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("chat-db")))
-            .AddSingleton<ConnectionManager>();
+            .AddSingleton<ConnectionManager>()
+            .AddHostedService<DefaultChannelSeeder>();
 
         return services;
     }

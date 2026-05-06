@@ -284,6 +284,10 @@ FakesAssemblies/
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 node_modules/
+.svelte-kit/
+src/Apps/Web/build/
+src/Apps/Web/.vite/
+.dev-certs/
 
 # Visual Studio 6 build log
 *.plg
@@ -400,3 +404,4 @@ FodyWeavers.xsd
 # Verify
 *.received.*
 *.received/
+/.dotnet/.dotnet

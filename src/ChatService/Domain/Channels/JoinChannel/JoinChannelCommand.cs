@@ -24,19 +24,26 @@ public partial class JoinChannelResult :
     public struct UserAlreadyMember;
 }
 
-public sealed class JoinChannelCommandHandler(ChatDbContext dbContext, IHubContext<ChatHub, IChatHubClient> hubContext, ILogger<JoinChannelCommandHandler> logger) : IRequestHandler<JoinChannelCommand, JoinChannelResult>
+public sealed class JoinChannelCommandHandler(ChatDbContext dbContext, ConnectionManager connectionManager, IHubContext<ChatHub, IChatHubClient> hubContext, ILogger<JoinChannelCommandHandler> logger) : IRequestHandler<JoinChannelCommand, JoinChannelResult>
 {
     public async ValueTask<JoinChannelResult> Handle(JoinChannelCommand request, CancellationToken cancellationToken)
     {
         var channel = await dbContext.Channels.Include(x => x.Members).SingleOrDefaultAsync(x => x.Id == request.ChannelId, cancellationToken);
         if (channel is null)
         {
-            return new JoinChannelResult.Success();
+            return new JoinChannelResult.ChannelNotFound();
         }
 
         var member = channel.Members.Find(x => x.UserId == request.User.UserId);
         if (member is not null)
         {
+            if (member.Status != ChannelMembershipStatus.Active)
+            {
+                member.Status = ChannelMembershipStatus.Active;
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            await AddActiveConnectionsToGroup(request.User.UserId, request.ChannelId, cancellationToken);
             return new JoinChannelResult.UserAlreadyMember();
         }
 
@@ -53,11 +60,18 @@ public sealed class JoinChannelCommandHandler(ChatDbContext dbContext, IHubConte
             });
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await AddActiveConnectionsToGroup(request.User.UserId, request.ChannelId, cancellationToken);
 
         await hubContext.Clients.Group(request.ChannelId).OnChannelMemberJoined(new ChannelMemberJoined(channel.ToIdentity(), request.User));
 
         logger.LogInformation("User {UserId} joined channel {ChannelId}", request.User.UserId, request.ChannelId);
 
         return new JoinChannelResult.Success();
+    }
+
+    private async Task AddActiveConnectionsToGroup(string userId, string channelId, CancellationToken cancellationToken)
+    {
+        foreach (var connectionId in connectionManager.GetConnections(userId))
+            await hubContext.Groups.AddToGroupAsync(connectionId, channelId, cancellationToken);
     }
 }

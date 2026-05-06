@@ -16,7 +16,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddLetsTalkJwtBearer(builder.Configuration);
 builder.Services.AddAuthorization();
 
-builder.Services.AddSignalR(options => options.EnableDetailedErrors = builder.Environment.IsDevelopment());
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:5173", "https://localhost:5173"];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "WebApp",
+        policy => policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
+});
+
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    options.MaximumReceiveMessageSize = 3 * 1024 * 1024;
+});
 
 var app = builder.Build();
 
@@ -31,6 +49,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("WebApp");
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -1,5 +1,6 @@
 ﻿using LetsTalk.Chat.Services;
 using LetsTalk.Events;
+using LetsTalk.Chat.Entities;
 using LetsTalk.Models;
 using LetsTalk.Services;
 using Mediator;
@@ -21,7 +22,7 @@ public sealed class ConnectUserCommandHandler(ConnectionManager connectionManage
 
         // Add user to groups based on channels
         var userChannels = await dbContext.Members.AsNoTracking()
-            .Where(m => m.UserId == request.User.UserId)
+            .Where(m => m.UserId == request.User.UserId && m.Status == ChannelMembershipStatus.Active)
             .ToArrayAsync(cancellationToken: cancellationToken);
 
         await Task.WhenAll(userChannels.Select(channel => hubContext.Groups.AddToGroupAsync(request.ConnectionId, channel.ChannelId, cancellationToken)));

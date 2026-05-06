@@ -39,6 +39,7 @@ public static class IdentityEndpoints
         var user = new AppUser();
         await userStore.SetUserNameAsync(user, registration.UserName, CancellationToken.None);
         await ((IUserEmailStore<AppUser>)userStore).SetEmailAsync(user, registration.Email, CancellationToken.None);
+        user.AvatarUrl = registration.AvatarUrl;
 
         var result = await userManager.CreateAsync(user, registration.Password);
 

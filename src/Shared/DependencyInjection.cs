@@ -87,6 +87,17 @@ public static class LetsTalkExtensions
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Base64UrlEncoder.DecodeBytes(sectionOptions.Value.SecurityKey)),
                     };
+                    bearerOptions.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"].ToString();
+                            if (!string.IsNullOrEmpty(accessToken) && context.HttpContext.Request.Path.StartsWithSegments("/hub"))
+                                context.Token = accessToken;
+
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             return builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme);
