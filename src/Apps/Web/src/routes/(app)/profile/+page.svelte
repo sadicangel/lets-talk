@@ -1,115 +1,50 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import * as Avatar from '$lib/components/ui/avatar';
+  import { Button } from '$lib/components/ui/button';
+  import * as Card from '$lib/components/ui/card';
+  import { Input } from '$lib/components/ui/input';
+  import { Label } from '$lib/components/ui/label';
 
   let { data, form } = $props();
   const current = $derived(form?.profile ?? data.profile);
 </script>
 
-<main class="profile-page">
-  <section>
+<main class="mx-auto grid w-full max-w-3xl gap-6 px-5 py-8">
+  <section class="flex items-center justify-between gap-5">
     <div>
-      <h1>Profile</h1>
-      <p>{current.userName}</p>
+      <h1 class="text-3xl font-semibold tracking-normal">Profile</h1>
+      <p class="mt-1 text-sm font-medium text-muted-foreground">{current.userName}</p>
     </div>
-    {#if current.avatarUrl}
-      <img src={current.avatarUrl} alt="" />
-    {/if}
+    <Avatar.Root class="size-18">
+      {#if current.avatarUrl}
+        <Avatar.Image src={current.avatarUrl} alt="" />
+      {:else}
+        <Avatar.Fallback>{current.userName.slice(0, 1).toUpperCase()}</Avatar.Fallback>
+      {/if}
+    </Avatar.Root>
   </section>
 
-  <form method="POST" use:enhance>
-    <label>
-      Email
-      <input name="email" type="email" autocomplete="email" value={form?.email ?? current.email} required />
-    </label>
-    <label>
-      Avatar URL
-      <input name="avatarUrl" type="url" value={form?.avatarUrl ?? current.avatarUrl ?? ''} />
-    </label>
-    {#if form?.message}
-      <p class="success">{form.message}</p>
-    {/if}
-    <button type="submit">Save profile</button>
-  </form>
+  <Card.Card>
+    <Card.CardHeader>
+      <Card.CardTitle>Account details</Card.CardTitle>
+      <Card.CardDescription>Update how you appear in channels.</Card.CardDescription>
+    </Card.CardHeader>
+    <Card.CardContent>
+      <form class="grid gap-4" method="POST" use:enhance>
+        <div class="grid gap-2">
+          <Label for="email">Email</Label>
+          <Input id="email" name="email" type="email" autocomplete="email" value={form?.email ?? current.email} required />
+        </div>
+        <div class="grid gap-2">
+          <Label for="avatarUrl">Avatar URL</Label>
+          <Input id="avatarUrl" name="avatarUrl" type="url" value={form?.avatarUrl ?? current.avatarUrl ?? ''} />
+        </div>
+        {#if form?.message}
+          <p class="text-sm font-medium text-primary">{form.message}</p>
+        {/if}
+        <Button class="w-fit" type="submit">Save profile</Button>
+      </form>
+    </Card.CardContent>
+  </Card.Card>
 </main>
-
-<style>
-  .profile-page {
-    display: grid;
-    gap: 24px;
-    width: min(100%, 720px);
-    margin: 0 auto;
-    padding: 32px 20px;
-  }
-
-  section {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-  }
-
-  h1,
-  p {
-    margin: 0;
-  }
-
-  h1 {
-    font-size: 2rem;
-  }
-
-  p {
-    margin-top: 4px;
-    color: #60706a;
-    font-weight: 700;
-  }
-
-  img {
-    width: 72px;
-    height: 72px;
-    border-radius: 8px;
-    object-fit: cover;
-  }
-
-  form {
-    display: grid;
-    gap: 16px;
-    padding: 24px;
-    border: 1px solid #dbe1dc;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  label {
-    display: grid;
-    gap: 7px;
-    color: #40504a;
-    font-weight: 800;
-  }
-
-  input {
-    min-height: 44px;
-    border: 1px solid #cdd7d1;
-    border-radius: 7px;
-    padding: 0 12px;
-  }
-
-  input:focus {
-    border-color: #1a6d5c;
-    outline: 3px solid rgba(26, 109, 92, 0.14);
-  }
-
-  button {
-    width: fit-content;
-    min-height: 42px;
-    border: 0;
-    border-radius: 7px;
-    padding: 0 16px;
-    background: #1a6d5c;
-    color: #ffffff;
-    font-weight: 900;
-  }
-
-  .success {
-    color: #1a6d5c;
-  }
-</style>
