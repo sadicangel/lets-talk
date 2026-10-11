@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace LetsTalk.Chat.Hub.DisconnectUser;
+namespace LetsTalk.Chat.Hub;
 
 public sealed record class DisconnectUserCommand(UserIdentity User, string ConnectionId) : IRequest;
 

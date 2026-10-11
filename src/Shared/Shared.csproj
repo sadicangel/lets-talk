@@ -1,14 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
+    <!-- RC1 configuration packages require ChangeToken APIs absent from the .NET 11 Preview 6 shared framework. -->
+    <PackageReference Include="Microsoft.Extensions.Primitives" NoWarn="NU1510" />
     <PackageReference Include="Refit.HttpClientFactory" />
   </ItemGroup>
 

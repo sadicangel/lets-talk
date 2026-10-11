@@ -1,6 +1,6 @@
-﻿using LetsTalk.Chat.Services;
+﻿using LetsTalk.Chat.Entities;
+using LetsTalk.Chat.Services;
 using LetsTalk.Events;
-using LetsTalk.Chat.Entities;
 using LetsTalk.Models;
 using LetsTalk.Services;
 using Mediator;
@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace LetsTalk.Chat.Hub.ConnectUser;
+namespace LetsTalk.Chat.Hub;
 
 public sealed record class ConnectUserCommand(UserIdentity User, string ConnectionId) : IRequest;
 

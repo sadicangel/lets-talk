@@ -7,7 +7,7 @@ using Mediator;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
-namespace LetsTalk.Chat.Hub.SendMessage;
+namespace LetsTalk.Chat.Hub;
 
 public sealed record class SendMessageCommand(UserIdentity User, string ChannelId, string ContentType, byte[] Content) : IRequest;
 

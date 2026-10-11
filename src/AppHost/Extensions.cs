@@ -88,7 +88,7 @@ internal static class Extensions
                             new ExecuteCommandResult
                             {
                                 Success = false,
-                                ErrorMessage = ex.ToString()
+                                Message = ex.ToString()
                             });
                     }
                 },

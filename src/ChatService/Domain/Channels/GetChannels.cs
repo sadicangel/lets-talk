@@ -1,17 +1,12 @@
 ﻿using LetsTalk.Chat.Entities;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
-using OneOf;
 
-namespace LetsTalk.Chat.Channels.GetChannels;
+namespace LetsTalk.Chat.Channels;
+
+public union GetChannelsResult(SuccessResult<IReadOnlyList<Channel>>, SuccessResult);
 
 public sealed record class GetChannelsQuery(string? UserId) : IRequest<GetChannelsResult>;
-
-[GenerateOneOf]
-public sealed partial class GetChannelsResult : OneOfBase<GetChannelsResult.Success>
-{
-    public readonly record struct Success(IReadOnlyList<Channel> Channels);
-}
 
 public sealed class GetChannelsQueryHandler(ChatDbContext dbContext) : IRequestHandler<GetChannelsQuery, GetChannelsResult>
 {
@@ -29,6 +24,6 @@ public sealed class GetChannelsQueryHandler(ChatDbContext dbContext) : IRequestH
                 .Select(m => m.Channel)
                 .ToListAsync(cancellationToken);
 
-        return new GetChannelsResult.Success(channels);
+        return new SuccessResult<IReadOnlyList<Channel>>(channels);
     }
 }

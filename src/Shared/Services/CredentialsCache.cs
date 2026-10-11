@@ -9,7 +9,7 @@ public sealed class CredentialsCache(IOptions<CredentialsCacheOptions> options, 
     private AccessTokenResponse? _response;
     private DateTimeOffset _expires;
 
-    public async Task<string> GetBearerTokenAsync(CancellationToken cancellationToken)
+    public async ValueTask<string> GetBearerTokenAsync(CancellationToken cancellationToken)
     {
         if (_response is null)
         {

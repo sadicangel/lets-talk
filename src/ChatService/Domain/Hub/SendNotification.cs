@@ -5,7 +5,7 @@ using Mediator;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
-namespace LetsTalk.Chat.Hub.SendNotification;
+namespace LetsTalk.Chat.Hub;
 
 public sealed record class SendNotificationCommand(string ContentType, byte[] Content) : IRequest;
 

@@ -1,20 +1,14 @@
-﻿using LetsTalk.Chat.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using LetsTalk.Chat.Entities;
 using LetsTalk.Models;
 using Mediator;
 using Microsoft.Extensions.Logging;
-using OneOf;
 
-namespace LetsTalk.Chat.Channels.CreateChannel;
+namespace LetsTalk.Chat.Channels;
+
+public union CreateChannelResult(SuccessResult<Channel>, InvalidResult);
 
 public sealed record class CreateChannelCommand(UserIdentity User, string Name, string? Description) : IRequest<CreateChannelResult>;
-
-[GenerateOneOf]
-public sealed partial class CreateChannelResult : OneOfBase<CreateChannelResult.Success, CreateChannelResult.Invalid>
-{
-    public readonly record struct Success(Channel Channel);
-
-    public readonly record struct Invalid(IReadOnlyDictionary<string, string[]> Errors);
-}
 
 public sealed class CreateChannelCommandHandler(ChatDbContext dbContext, TimeProvider timeProvider, ILogger<CreateChannelCommandHandler> logger) : IRequestHandler<CreateChannelCommand, CreateChannelResult>
 {
@@ -22,7 +16,7 @@ public sealed class CreateChannelCommandHandler(ChatDbContext dbContext, TimePro
     {
         if (string.IsNullOrWhiteSpace(request.Name))
         {
-            return new CreateChannelResult.Invalid(new Dictionary<string, string[]> { [nameof(request.Name)] = ["Channel name cannot be null or whitespace"] });
+            return new InvalidResult(new ValidationResult("Channel name cannot be null or whitespace", [nameof(request.Name)]));
         }
 
         var utcNow = timeProvider.GetUtcNow();
@@ -51,6 +45,6 @@ public sealed class CreateChannelCommandHandler(ChatDbContext dbContext, TimePro
 
         logger.LogInformation("Created new channel {ChannelId} named {ChannelName} by user {UserId}", channel.Id, channel.Name, request.User.UserId);
 
-        return new CreateChannelResult.Success(channel);
+        return new SuccessResult<Channel>(channel);
     }
 }
