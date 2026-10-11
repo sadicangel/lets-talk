@@ -4,7 +4,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
     <!-- RC1 configuration packages require ChangeToken APIs absent from the .NET 11 Preview 6 shared framework. -->
-    <PackageReference Include="Microsoft.Extensions.Primitives" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" NoWarn="NU1510" />
     <PackageReference Include="Refit.HttpClientFactory" />
   </ItemGroup>
 
