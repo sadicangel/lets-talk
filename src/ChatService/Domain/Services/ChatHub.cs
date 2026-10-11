@@ -1,6 +1,4 @@
-﻿using LetsTalk.Chat.Hub.ConnectUser;
-using LetsTalk.Chat.Hub.DisconnectUser;
-using LetsTalk.Chat.Hub.SendMessage;
+﻿using LetsTalk.Chat.Hub;
 using LetsTalk.Services;
 using Mediator;
 using Microsoft.AspNetCore.SignalR;

@@ -1,10 +1,6 @@
-﻿using LetsTalk.Chat.Channels.CreateChannel;
-using LetsTalk.Chat.Channels.DeleteChannel;
-using LetsTalk.Chat.Channels.FindChannel;
-using LetsTalk.Chat.Channels.GetChannels;
-using LetsTalk.Chat.Channels.JoinChannel;
-using LetsTalk.Chat.Channels.LeaveChannel;
-using LetsTalk.Chat.Channels.UpdateChannel;
+﻿using System.Diagnostics;
+using LetsTalk.Chat.Channels;
+using LetsTalk.Chat.Entities;
 using LetsTalk.Services;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -31,60 +27,76 @@ public static class ChannelEndpoints
 
     private static async Task<Ok<ChannelListResponse>> GetChannels(string? userId, IMediator mediator, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetChannelsQuery(userId), cancellationToken);
-        return result.Match<Ok<ChannelListResponse>>(success => TypedResults.Ok(new ChannelListResponse([.. success.Channels.Select(channel => new ChannelResponse(channel.Id, channel.Name, channel.Description, [.. channel.Members.Select(x => x.UserId)]))])));
+        return await mediator.Send(new GetChannelsQuery(userId), cancellationToken) switch
+        {
+            SuccessResult<IReadOnlyList<Channel>>(var channels) => TypedResults.Ok(new ChannelListResponse([.. channels.Select(channel => new ChannelResponse(channel.Id, channel.Name, channel.Description, [.. channel.Members.Select(x => x.UserId)]))])),
+            SuccessResult => throw new UnreachableException(), // TODO: This never happens, but I guess we can't have union types that only return one case?
+            _ => throw new UnreachableException()
+        };
     }
 
     private static async Task<Results<Ok<ChannelResponse>, NotFound>> GetChannel(string channelId, IMediator mediator, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new FindChannelQuery(channelId), cancellationToken);
-        return result.Match<Results<Ok<ChannelResponse>, NotFound>>(
-            success => TypedResults.Ok(new ChannelResponse(success.Channel.Id, success.Channel.Name, success.Channel.Description, [.. success.Channel.Members.Select(x => x.UserId)])),
-            channelNotFound => TypedResults.NotFound());
+        return await mediator.Send(new FindChannelQuery(channelId), cancellationToken) switch
+        {
+            SuccessResult<Channel>(var channel) => TypedResults.Ok(new ChannelResponse(channel.Id, channel.Name, channel.Description, [.. channel.Members.Select(x => x.UserId)])),
+            ChannelNotFoundResult => TypedResults.NotFound(),
+            _ => throw new UnreachableException()
+        };
     }
 
     private static async Task<Results<Created<ChannelResponse>, ValidationProblem>> CreateChannel(ChannelRequest request, IMediator mediator, HttpContext context, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new CreateChannelCommand(context.User.UserIdentity, request.Name, request.Description), cancellationToken);
-        return result.Match<Results<Created<ChannelResponse>, ValidationProblem>>(
-            success => TypedResults.Created($"/api/channels/{success.Channel.Id}", new ChannelResponse(success.Channel.Id, success.Channel.Name, success.Channel.Description, [.. success.Channel.Members.Select(x => x.UserId)])),
-            invalid => TypedResults.ValidationProblem(invalid.Errors));
+        return await mediator.Send(new CreateChannelCommand(context.User.UserIdentity, request.Name, request.Description), cancellationToken) switch
+        {
+            SuccessResult<Channel>(var channel) => TypedResults.Created($"/api/channels/{channel.Id}", new ChannelResponse(channel.Id, channel.Name, channel.Description, [.. channel.Members.Select(x => x.UserId)])),
+            InvalidResult(var errors) => TypedResults.ValidationProblem(errors.ToDictionary()),
+            _ => throw new UnreachableException()
+        };
     }
 
     private static async Task<Results<Ok<ChannelResponse>, NotFound, UnauthorizedHttpResult, ValidationProblem>> UpdateChannel(string channelId, ChannelRequest request, IMediator mediator, HttpContext context, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateChannelCommand(context.User.UserIdentity, channelId, request.Name, request.Description), cancellationToken);
-        return result.Match<Results<Ok<ChannelResponse>, NotFound, UnauthorizedHttpResult, ValidationProblem>>(
-            success => TypedResults.Ok(new ChannelResponse(success.Channel.Id, success.Channel.Name, success.Channel.Description, [.. success.Channel.Members.Select(x => x.UserId)])),
-            invalid => TypedResults.ValidationProblem(invalid.Errors),
-            channelNotFound => TypedResults.NotFound(),
-            unauthorized => TypedResults.Unauthorized());
+        return await mediator.Send(new UpdateChannelCommand(context.User.UserIdentity, channelId, request.Name, request.Description), cancellationToken) switch
+        {
+            SuccessResult<Channel>(var channel) => TypedResults.Ok(new ChannelResponse(channel.Id, channel.Name, channel.Description, [.. channel.Members.Select(x => x.UserId)])),
+            InvalidResult(var errors) => TypedResults.ValidationProblem(errors.ToDictionary()),
+            ChannelNotFoundResult => TypedResults.NotFound(),
+            UnauthorizedResult => TypedResults.Unauthorized(),
+            _ => throw new UnreachableException()
+        };
     }
 
     private static async Task<Results<NoContent, NotFound, UnauthorizedHttpResult>> DeleteChannel(string channelId, IMediator mediator, HttpContext context, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteChannelCommand(context.User.UserIdentity, channelId), cancellationToken);
-        return result.Match<Results<NoContent, NotFound, UnauthorizedHttpResult>>(
-            success => TypedResults.NoContent(),
-            channelNotFound => TypedResults.NotFound(),
-            unauthorized => TypedResults.Unauthorized());
+        return await mediator.Send(new DeleteChannelCommand(context.User.UserIdentity, channelId), cancellationToken) switch
+        {
+            SuccessResult => TypedResults.NoContent(),
+            ChannelNotFoundResult => TypedResults.NotFound(),
+            UnauthorizedResult => TypedResults.Unauthorized(),
+            _ => throw new UnreachableException()
+        };
     }
 
     private static async Task<Results<Ok, NotFound>> JoinChannel(string channelId, IMediator mediator, HttpContext context, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new JoinChannelCommand(context.User.UserIdentity, channelId), cancellationToken);
-        return result.Match<Results<Ok, NotFound>>(
-            success => TypedResults.Ok(),
-            channelNotFound => TypedResults.NotFound(),
-            userAlreadyMember => TypedResults.Ok());
+        return await mediator.Send(new JoinChannelCommand(context.User.UserIdentity, channelId), cancellationToken) switch
+        {
+            SuccessResult => TypedResults.Ok(),
+            ChannelNotFoundResult => TypedResults.NotFound(),
+            UserAlreadyMemberResult => TypedResults.Ok(),
+            _ => throw new UnreachableException()
+        };
     }
 
     private static async Task<Results<Ok, NotFound>> LeaveChannel(string channelId, IMediator mediator, HttpContext context, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new LeaveChannelCommand(context.User.UserIdentity, channelId), cancellationToken);
-        return result.Match<Results<Ok, NotFound>>(
-            success => TypedResults.Ok(),
-            channelNotFound => TypedResults.NotFound(),
-            userNotMember => TypedResults.Ok());
+        return await mediator.Send(new LeaveChannelCommand(context.User.UserIdentity, channelId), cancellationToken) switch
+        {
+            SuccessResult => TypedResults.Ok(),
+            ChannelNotFoundResult => TypedResults.NotFound(),
+            UserNotMemberResult => TypedResults.Ok(),
+            _ => throw new UnreachableException()
+        };
     }
 }

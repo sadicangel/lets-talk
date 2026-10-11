@@ -56,7 +56,7 @@ public static class LetsTalkExtensions
                                 new Uri(chatApi.Url) + chatApi.HubName,
                                 options =>
                                 {
-                                    options.AccessTokenProvider = () => provider.GetRequiredService<CredentialsCache>().GetBearerTokenAsync(CancellationToken.None)!;
+                                    options.AccessTokenProvider = async () => await provider.GetRequiredService<CredentialsCache>().GetBearerTokenAsync(CancellationToken.None)!;
                                     options.HttpMessageHandlerFactory = _ => provider.GetRequiredService<IHttpMessageHandlerFactory>().CreateHandler();
                                 })
                             .WithAutomaticReconnect()
